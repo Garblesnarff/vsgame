@@ -1,0 +1,70 @@
+/* Player */
+.player {
+    position: absolute;
+    width: 30px;
+    height: 40px;
+    background-color: #800080;
+    border-radius: 50% 50% 0 0;
+}
+
+/* Enemy */
+.enemy {
+    position: absolute;
+    width: 25px;
+    height: 25px;
+    background-color: #cc0000;
+    border-radius: 5px;
+}
+
+.enemy-health-container {
+    position: absolute;
+    width: 25px;
+    height: 3px;
+    background-color: #333;
+    top: -7px;
+    left: 0;
+}
+
+.enemy-health-bar {
+    height: 100%;
+    width: 100%;
+    background-color: #00cc00;
+}
+
+/* Projectiles */
+.projectile {
+    position: absolute;
+    width: 10px;
+    height: 10px;
+    background-color: #660066;
+    border-radius: 50%;
+}
+
+/* Particle Effects */
+.blood-particle {
+    position: absolute;
+    width: 5px;
+    height: 5px;
+    background-color: #ff0000;
+    border-radius: 50%;
+    opacity: 0.8;
+}
+
+.shadow-trail {
+    position: absolute;
+    width: 20px;
+    height: 30px;
+    background-color: rgba(128, 0, 128, 0.3);
+    border-radius: 50% 50% 0 0;
+    pointer-events: none;
+}
+
+/* Bat ability */
+.bat {
+    position: absolute;
+    width: 10px;
+    height: 5px;
+    background-color: #800080;
+    border-radius: 5px;
+    transform-origin: center;
+}
