@@ -1,4 +1,3 @@
-import CONFIG from './config.js';
 import { Game } from './game/game.js';
 
 /**
@@ -14,6 +13,9 @@ document.addEventListener('DOMContentLoaded', () => {
     
     // Start the game
     game.start();
+    
+    // Expose game instance to window for debugging (optional)
+    window.vampireGame = game;
     
     // Log initialization for debugging
     console.log('Vampire Survival Game initialized successfully!');

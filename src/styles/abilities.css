@@ -1,274 +1,122 @@
-/* Stats display */
-#stats {
-    position: absolute;
-    top: 10px;
-    left: 10px;
-    z-index: 10;
-}
-
-.bar-container {
-    width: 200px;
-    height: 20px;
-    background-color: #333;
-    margin-bottom: 5px;
-}
-
-#health-bar {
-    height: 100%;
-    width: 100%;
-    background-color: #b30000;
-}
-
-#energy-bar {
-    height: 100%;
-    width: 100%;
-    background-color: #00b3b3;
-}
-
-/* Game states */
-.game-over {
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    font-size: 36px;
-    color: #ff0000;
-    text-align: center;
-    display: none;
-}
-
-.level-up {
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    font-size: 36px;
-    color: #ffcc00;
-    text-align: center;
-    display: none;
-}
-
-/* Auto attack toggle */
-.auto-attack-toggle {
+/* Ability-specific styles only */
+/* Ability buttons bar */
+#abilities {
     position: absolute;
     bottom: 20px;
-    right: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    gap: 20px;
+}
+
+.ability {
+    width: 60px;
+    height: 60px;
     background-color: #333;
     border: 2px solid #666;
-    border-radius: 5px;
-    padding: 5px 10px;
-    cursor: pointer;
-}
-
-.auto-attack-toggle.active {
-    background-color: #008800;
-}
-
-/* Skill points display */
-.skill-points {
-    position: absolute;
-    top: 10px;
-    right: 20px;
-    background-color: #4b0082;
-    border: 2px solid #8a2be2;
-    border-radius: 5px;
-    padding: 5px 10px;
-    z-index: 100;
-    cursor: pointer;
-}
-
-.skill-points:hover {
-    background-color: #6a1cb7;
-}
-
-/* Skill Menu Styles */
-.skill-menu-overlay {
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background-color: rgba(0, 0, 0, 0.7);
-    z-index: 1000;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    display: none;
-}
-
-.skill-menu {
-    width: 80%;
-    max-width: 800px;
-    height: 80%;
-    background-color: #111;
-    border: 3px solid #8a2be2;
     border-radius: 10px;
-    overflow: auto;
-    padding: 20px;
-    color: white;
-    position: relative;
-}
-
-.skill-menu-header {
     display: flex;
-    justify-content: space-between;
+    flex-direction: column;
     align-items: center;
-    margin-bottom: 20px;
-    border-bottom: 2px solid #8a2be2;
-    padding-bottom: 10px;
-}
-
-.skill-menu-header h2 {
-    margin: 0;
-    color: #8a2be2;
-}
-
-.skill-points-display {
-    background-color: #4b0082;
-    padding: 5px 10px;
-    border-radius: 5px;
-}
-
-.skill-menu-close {
-    position: absolute;
-    top: 10px;
-    right: 10px;
-    background-color: #a00;
-    color: white;
-    border: none;
-    border-radius: 5px;
-    padding: 5px 10px;
+    justify-content: center;
+    position: relative;
     cursor: pointer;
 }
 
-.skill-menu-close:hover {
-    background-color: #c00;
+.ability:hover {
+    border-color: #999;
+    background-color: #444;
 }
 
-.skill-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-    gap: 15px;
-}
-
-.skill-card {
-    background-color: #222;
-    border: 2px solid #444;
-    border-radius: 8px;
-    padding: 15px;
-    transition: border-color 0.3s;
-    position: relative;
-}
-
-.skill-card:hover {
-    border-color: #8a2be2;
-}
-
-.skill-card-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 10px;
-    border-bottom: 1px solid #444;
-    padding-bottom: 5px;
-}
-
-.skill-card-header h3 {
-    margin: 0;
-    color: #8a2be2;
-}
-
-.skill-level {
-    display: flex;
-    gap: 3px;
-    margin-top: 10px;
-}
-
-.level-pip {
-    width: 15px;
-    height: 8px;
-    background-color: #333;
-    border-radius: 2px;
-}
-
-.level-pip.filled {
-    background-color: #8a2be2;
-}
-
-.skill-description {
-    margin-bottom: 15px;
-    font-size: 14px;
-    color: #ccc;
-}
-
-.skill-effects {
-    margin-bottom: 15px;
-    font-size: 12px;
-}
-
-.skill-effect {
-    display: flex;
-    justify-content: space-between;
+.ability-icon {
+    font-size: 24px;
     margin-bottom: 5px;
 }
 
-.skill-effect-name {
-    color: #8a8;
-}
-
-.skill-effect-value {
-    color: #aa8;
-}
-
-.skill-upgrade-btn {
-    background-color: #4b0082;
-    color: white;
-    border: none;
-    border-radius: 5px;
-    padding: 8px 15px;
-    width: 100%;
-    cursor: pointer;
-    transition: background-color 0.3s;
-}
-
-.skill-upgrade-btn:hover:not(:disabled) {
-    background-color: #8a2be2;
-}
-
-.skill-upgrade-btn:disabled {
-    background-color: #333;
-    color: #666;
-    cursor: not-allowed;
-}
-
-.new-ability-badge {
+.ability-key {
+    font-size: 12px;
     position: absolute;
-    top: -10px;
-    right: -10px;
-    background-color: #ff0;
-    color: #000;
+    bottom: 5px;
+    right: 5px;
+    background-color: #222;
+    padding: 2px 5px;
+    border-radius: 3px;
+}
+
+.ability-level {
     font-size: 10px;
-    padding: 3px 6px;
-    border-radius: 10px;
-    font-weight: bold;
+    position: absolute;
+    top: 5px;
+    right: 5px;
+    background-color: #500;
+    color: #fff;
+    padding: 2px 5px;
+    border-radius: 3px;
 }
 
-.skill-locked {
+.ability-cooldown {
     position: absolute;
-    top: 0;
+    bottom: 0;
     left: 0;
     width: 100%;
-    height: 100%;
+    height: 0%;
     background-color: rgba(0, 0, 0, 0.7);
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    border-radius: 6px;
+    border-radius: 8px;
 }
 
-.skill-locked-message {
-    background-color: #500;
-    padding: 10px;
+/* Ability visual effects */
+.blood-nova {
+    position: absolute;
+    border-radius: 50%;
+    border: 2px solid #b30000;
+    opacity: 0.7;
+    pointer-events: none;
+}
+
+.blood-drain-aoe {
+    position: absolute;
+    border-radius: 50%;
+    border: 3px solid #ff0000;
+    background-color: rgba(255, 0, 0, 0.1);
+    pointer-events: none;
+    z-index: 5;
+}
+
+/* Blood Lance ability */
+.blood-lance {
+    position: absolute;
+    width: 30px;
+    height: 5px;
+    background-color: #ff0000;
     border-radius: 5px;
-    text-align: center;
+    transform-origin: center;
+    box-shadow: 0 0 10px #ff0000;
+}
+
+/* Night Shield ability */
+.night-shield {
+    position: absolute;
+    border-radius: 50%;
+    border: 3px solid #4b0082;
+    background-color: rgba(75, 0, 130, 0.2);
+    pointer-events: none;
+    z-index: 5;
+}
+
+.shield-health-bar {
+    position: absolute;
+    width: 100%;
+    height: 6px;
+    background-color: #333;
+    bottom: -10px;
+    left: 0;
+    border-radius: 3px;
+    overflow: hidden;
+}
+
+.shield-health-fill {
+    height: 100%;
+    width: 100%;
+    background-color: #4b0082;
+    border-radius: 3px;
 }
