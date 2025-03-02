@@ -1,12 +1,14 @@
 import CONFIG from '../config.js';
 import { AbilityManager } from '../abilities/ability-manager.js';
+import { GameEvents, EVENTS } from '../utils/event-system.js';
 
 /**
  * Player class representing the main character in the game
  */
 export class Player {
-    constructor(gameContainer) {
+    constructor(gameContainer, game) {
         this.gameContainer = gameContainer;
+        this.game = game;
         
         // Position and dimensions
         this.x = CONFIG.GAME_WIDTH / 2 - CONFIG.PLAYER.WIDTH / 2;
@@ -112,9 +114,15 @@ export class Player {
         
         this.health -= amount;
         
+        // Emit damage event
+        GameEvents.emit(EVENTS.PLAYER_DAMAGE, amount, this);
+        
         if (this.health <= 0) {
             this.health = 0;
             this.isAlive = false;
+            
+            // Emit death event
+            GameEvents.emit(EVENTS.PLAYER_DEATH, this);
         }
         
         return true;
@@ -125,7 +133,13 @@ export class Player {
      * @param {number} amount - Healing amount
      */
     heal(amount) {
+        const oldHealth = this.health;
         this.health = Math.min(this.maxHealth, this.health + amount);
+        
+        // Only emit heal event if actually healed
+        if (this.health > oldHealth) {
+            GameEvents.emit(EVENTS.PLAYER_HEAL, amount, this);
+        }
     }
     
     /**
@@ -236,6 +250,12 @@ export class Player {
         
         // Increase auto attack base damage with level
         this.autoAttack.damage = CONFIG.ABILITIES.AUTO_ATTACK.DAMAGE + this.level * 2;
+        
+        // Emit level up event
+        GameEvents.emit(EVENTS.PLAYER_LEVEL_UP, this.level, this);
+        
+        // Emit skill point gained event
+        GameEvents.emit(EVENTS.PLAYER_SKILL_POINT, this.skillPoints, this);
     }
     
     /**

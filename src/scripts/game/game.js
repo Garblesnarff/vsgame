@@ -1,11 +1,11 @@
 import { Player } from '../entities/player.js';
 import { Projectile } from '../entities/projectile.js';
-import { Particle } from '../entities/particle.js';
 import { GameLoop } from './game-loop.js';
 import { InputHandler } from './input-handler.js';
 import { SpawnSystem } from './spawn-system.js';
 import { UIManager } from '../ui/ui-manager.js';
 import { ParticleSystem } from './particle-system.js';
+import { GameEvents, EVENTS } from '../utils/event-system.js';
 import CONFIG from '../config.js';
 
 /**
@@ -27,13 +27,60 @@ export class Game {
         this.particleSystem = new ParticleSystem(this.gameContainer);
         
         // Create player
-        this.player = new Player(this.gameContainer);
+        this.player = new Player(this.gameContainer, this);
         
         // Create UI manager
         this.uiManager = new UIManager(this);
         
         // Initialize ability UI
         this.player.abilityManager.initializeUI();
+        
+        // Setup event listeners
+        this.setupEventListeners();
+        
+        // Emit initialization event
+        GameEvents.emit(EVENTS.GAME_INIT, this);
+    }
+    
+    /**
+     * Setup game event listeners
+     */
+    setupEventListeners() {
+        // Player events
+        GameEvents.on(EVENTS.PLAYER_DAMAGE, (amount) => {
+            this.particleSystem.createBloodParticles(
+                this.player.x + this.player.width / 2,
+                this.player.y + this.player.height / 2,
+                10
+            );
+        });
+        
+        GameEvents.on(EVENTS.PLAYER_DEATH, () => {
+            this.gameOver();
+        });
+        
+        GameEvents.on(EVENTS.PLAYER_LEVEL_UP, () => {
+            this.handleLevelUp();
+        });
+        
+        // Enemy events
+        GameEvents.on(EVENTS.ENEMY_DEATH, (enemy) => {
+            const index = this.enemies.indexOf(enemy);
+            if (index !== -1) {
+                this.enemies.splice(index, 1);
+            }
+        });
+        
+        // UI events
+        GameEvents.on(EVENTS.UI_SKILL_MENU_OPEN, () => {
+            this.gameLoop.pauseGame(this.gameContainer);
+        });
+        
+        GameEvents.on(EVENTS.UI_SKILL_MENU_CLOSE, () => {
+            if (this.player.isAlive) {
+                this.gameLoop.resumeGame();
+            }
+        });
     }
     
     /**
@@ -41,6 +88,7 @@ export class Game {
      */
     start() {
         this.gameLoop.start(this.update.bind(this));
+        GameEvents.emit(EVENTS.GAME_START, this);
     }
     
     /**
@@ -64,6 +112,7 @@ export class Game {
         const newEnemy = this.spawnSystem.update(this.gameTime, this.player.level);
         if (newEnemy) {
             this.enemies.push(newEnemy);
+            GameEvents.emit(EVENTS.ENEMY_SPAWN, newEnemy);
         }
         
         // Auto-attack
@@ -143,17 +192,7 @@ export class Game {
                 
                 // Apply damage to player
                 if (this.player.takeDamage(damageAmount)) {
-                    // Create blood particles if damage was applied
-                    this.particleSystem.createBloodParticles(
-                        this.player.x + this.player.width / 2,
-                        this.player.y + this.player.height / 2,
-                        10
-                    );
-                    
-                    // Check if player died
-                    if (!this.player.isAlive) {
-                        this.gameOver();
-                    }
+                    // Event is emitted from the Player class now
                 }
                 
                 // Push enemy back
@@ -199,13 +238,16 @@ export class Game {
                     if (enemy.takeDamage(projectile.damage, this.particleSystem.createBloodParticles.bind(this.particleSystem))) {
                         // Enemy died
                         enemy.destroy();
+                        GameEvents.emit(EVENTS.ENEMY_DEATH, enemy, this.enemies[j]);
                         this.enemies.splice(j, 1);
                         
                         // Add kill to player
                         if (this.player.addKill()) {
-                            // Player leveled up
-                            this.handleLevelUp();
+                            // Player level up event is now emitted from the Player class
                         }
+                    } else {
+                        // Enemy damaged but not killed
+                        GameEvents.emit(EVENTS.ENEMY_DAMAGE, enemy, projectile.damage);
                     }
                     
                     // Handle Blood Lance special behavior
@@ -262,6 +304,7 @@ export class Game {
     gameOver() {
         this.gameLoop.stop();
         this.uiManager.showGameOver();
+        GameEvents.emit(EVENTS.GAME_OVER, this);
     }
     
     /**
@@ -273,7 +316,7 @@ export class Game {
         
         // Reset player
         this.player.destroy();
-        this.player = new Player(this.gameContainer);
+        this.player = new Player(this.gameContainer, this);
         this.player.abilityManager.initializeUI();
         
         // Reset game systems
@@ -286,6 +329,9 @@ export class Game {
         
         // Start game loop
         this.gameLoop.start(this.update.bind(this));
+        
+        // Emit restart event
+        GameEvents.emit(EVENTS.GAME_RESTART, this);
     }
     
     /**
@@ -325,6 +371,13 @@ export class Game {
         }
         
         this.gameLoop.togglePause(this.gameContainer);
+        
+        // Emit event based on new state
+        if (this.gameLoop.gamePaused) {
+            GameEvents.emit(EVENTS.GAME_PAUSE, this);
+        } else {
+            GameEvents.emit(EVENTS.GAME_RESUME, this);
+        }
     }
     
     /**
@@ -381,6 +434,9 @@ export class Game {
         if (upgraded) {
             this.player.skillPoints -= pointCost;
             this.uiManager.updateSkillMenu();
+            
+            // Emit upgrade event
+            GameEvents.emit(EVENTS.ABILITY_UPGRADE, skillId, this.player);
         }
     }
     
