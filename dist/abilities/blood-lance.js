@@ -1,0 +1,180 @@
+import { Ability } from "./ability-base";
+/**
+ * Blood Lance ability - Fire a piercing projectile that damages enemies and heals
+ */
+export class BloodLance extends Ability {
+    /**
+     * Create a new Blood Lance ability
+     * @param player - The player that owns this ability
+     * @param config - Configuration for the ability
+     */
+    constructor(player, config) {
+        super(player, {
+            name: "Blood Lance",
+            description: "Fire a powerful piercing projectile that damages enemies and heals you for each enemy hit",
+            key: "4",
+            cooldown: config.COOLDOWN,
+            energyCost: config.ENERGY_COST,
+            level: 0,
+            maxLevel: config.MAX_LEVEL,
+            unlocked: config.UNLOCKED,
+        });
+        this.damage = config.DAMAGE;
+        this.pierce = config.PIERCE;
+        this.healAmount = config.HEAL_AMOUNT;
+        this.speed = config.SPEED;
+    }
+    /**
+     * Use the blood lance ability
+     * @returns Whether the ability was used
+     */
+    use() {
+        if (!this.unlocked || !super.use()) {
+            return false;
+        }
+        // Find direction to target (closest enemy or mouse position)
+        const targetInfo = this.findTarget();
+        // Create the blood lance projectile
+        this.createLance(targetInfo.angle);
+        return true;
+    }
+    /**
+     * Find the best target for the lance
+     * @returns Target information { angle, targetX, targetY }
+     */
+    findTarget() {
+        let targetX, targetY;
+        // Try to find closest enemy
+        const closestEnemy = this.findClosestEnemy();
+        if (closestEnemy) {
+            targetX = closestEnemy.x + closestEnemy.width / 2;
+            targetY = closestEnemy.y + closestEnemy.height / 2;
+        }
+        else {
+            // Default direction if no enemies (to the right)
+            targetX = this.player.x + 100;
+            targetY = this.player.y;
+        }
+        // Calculate angle to target
+        const angle = Math.atan2(targetY - (this.player.y + this.player.height / 2), targetX - (this.player.x + this.player.width / 2));
+        return { angle, targetX, targetY };
+    }
+    /**
+     * Find the closest enemy for targeting
+     * @returns Closest enemy or null if none found
+     */
+    findClosestEnemy() {
+        // If we can access game enemies
+        if (!this.player.game ||
+            !this.player.game.enemies ||
+            this.player.game.enemies.length === 0) {
+            return null;
+        }
+        const enemies = this.player.game.enemies;
+        let closestEnemy = null;
+        let closestDistance = Infinity;
+        for (const enemy of enemies) {
+            const dx = enemy.x + enemy.width / 2 - (this.player.x + this.player.width / 2);
+            const dy = enemy.y + enemy.height / 2 - (this.player.y + this.player.height / 2);
+            const distance = Math.sqrt(dx * dx + dy * dy);
+            if (distance < closestDistance) {
+                closestEnemy = enemy;
+                closestDistance = distance;
+            }
+        }
+        return closestEnemy;
+    }
+    /**
+     * Create the blood lance projectile
+     * @param angle - Direction angle in radians
+     */
+    createLance(angle) {
+        // Use the game's createProjectile method if available
+        if (this.player.game && this.player.game.createProjectile) {
+            this.player.game.createProjectile({
+                x: this.player.x + this.player.width / 2,
+                y: this.player.y + this.player.height / 2,
+                vx: Math.cos(angle) * this.speed,
+                vy: Math.sin(angle) * this.speed,
+                damage: this.getScaledDamage(),
+                isBloodLance: true,
+                isAutoAttack: false,
+                pierce: this.getScaledPierce(),
+                pierceCount: 0,
+                healAmount: this.getScaledHealing(),
+                hitEnemies: new Set(),
+                className: "blood-lance",
+                angle: angle,
+            });
+        }
+        else {
+            // Fallback if game method not available
+            this.createFallbackLance(angle);
+        }
+    }
+    /**
+     * Create a fallback lance if the game's projectile system isn't available
+     * @param angle - Direction angle in radians
+     */
+    createFallbackLance(angle) {
+        const lanceElement = document.createElement("div");
+        lanceElement.className = "blood-lance";
+        lanceElement.style.left = this.player.x + this.player.width / 2 + "px";
+        lanceElement.style.top = this.player.y + this.player.height / 2 + "px";
+        lanceElement.style.transform = `rotate(${angle}rad)`;
+        this.player.gameContainer.appendChild(lanceElement);
+        // Animate the lance
+        let x = this.player.x + this.player.width / 2;
+        let y = this.player.y + this.player.height / 2;
+        const vx = Math.cos(angle) * this.speed;
+        const vy = Math.sin(angle) * this.speed;
+        const moveInterval = setInterval(() => {
+            x += vx;
+            y += vy;
+            lanceElement.style.left = x + "px";
+            lanceElement.style.top = y + "px";
+            // Remove when out of bounds
+            if (x < 0 || x > window.innerWidth || y < 0 || y > window.innerHeight) {
+                clearInterval(moveInterval);
+                if (lanceElement.parentNode) {
+                    lanceElement.parentNode.removeChild(lanceElement);
+                }
+            }
+        }, 16); // ~60fps
+    }
+    /**
+     * Get damage scaled by ability level
+     * @returns Scaled damage
+     */
+    getScaledDamage() {
+        return this.damage + (this.level - 1) * 50;
+    }
+    /**
+     * Get pierce count scaled by ability level
+     * @returns Scaled pierce count
+     */
+    getScaledPierce() {
+        return this.pierce + (this.level - 1);
+    }
+    /**
+     * Get healing amount scaled by ability level
+     * @returns Scaled healing
+     */
+    getScaledHealing() {
+        return this.healAmount + (this.level - 1) * 5;
+    }
+    /**
+     * Unlock the ability
+     * @returns Whether the unlock was successful
+     */
+    unlock() {
+        const result = super.unlock();
+        // Initialize UI once unlocked
+        if (result && !this.element) {
+            this.initializeUI("abilities", "blood-lance", "🗡️");
+        }
+        return result;
+    }
+}
+export default BloodLance;
+//# sourceMappingURL=blood-lance.js.map
