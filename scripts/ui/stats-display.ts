@@ -1,12 +1,19 @@
 import { Player } from "../entities/player";
 
 /**
+ * Type augmentation for Player to make TypeScript happy
+ */
+interface ExtendedPlayer extends Player {
+  levelSystem?: any;
+}
+
+/**
  * Stats Display
  * Manages the display of player statistics (health, energy, level, kills, etc.)
  */
 export class StatsDisplay {
   gameContainer: HTMLElement;
-  player: Player;
+  player: ExtendedPlayer;
   healthBar: HTMLElement | null;
   energyBar: HTMLElement | null;
   timeElement: HTMLElement | null;
@@ -21,7 +28,7 @@ export class StatsDisplay {
    */
   constructor(gameContainer: HTMLElement, player: Player) {
     this.gameContainer = gameContainer;
-    this.player = player;
+    this.player = player as ExtendedPlayer;
 
     // Get DOM elements
     this.healthBar = document.getElementById("health-bar");
@@ -105,8 +112,16 @@ export class StatsDisplay {
     }
 
     if (this.killsElement) {
-      this.killsElement.textContent =
-        this.player.kills + " / " + this.player.killsToNextLevel;
+      let kills = this.player.kills;
+      let killsToNextLevel = this.player.killsToNextLevel;
+      
+      // If the player has a level system, use its values
+      if (this.player.levelSystem) {
+        kills = (this.player.levelSystem as any).getKills();
+        killsToNextLevel = (this.player.levelSystem as any).getKillsToNextLevel();
+      }
+      
+      this.killsElement.textContent = kills + " / " + killsToNextLevel;
     }
 
     // Update skill points display

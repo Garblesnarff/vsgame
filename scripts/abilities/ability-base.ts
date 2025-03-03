@@ -175,6 +175,20 @@ export class Ability {
   }
 
   /**
+   * Deactivate the ability
+   * This is a base implementation that subclasses should override
+   */
+  deactivate(): void {
+    this.active = false;
+    
+    // Clean up visual effect
+    if (this.visualEffect && this.visualEffect.parentNode) {
+      this.visualEffect.parentNode.removeChild(this.visualEffect);
+      this.visualEffect = null;
+    }
+  }
+
+  /**
    * Update the ability's cooldown display in the UI
    */
   updateCooldownDisplay(): void {
@@ -183,7 +197,10 @@ export class Ability {
     }
 
     const now = Date.now();
-    const remaining = Math.max(0, this.lastUsed + this.cooldown - now);
+    const remaining = Math.max(
+      0,
+      this.lastUsed + this.cooldown - now
+    );
     const percentage = (remaining / this.cooldown) * 100;
 
     this.cooldownElement.style.height = percentage + "%";
@@ -244,15 +261,21 @@ export class Ability {
 
   /**
    * Clean up ability resources
-   *
-   * Removes any DOM elements or other resources created by this ability.
-   * Should be called when the ability is no longer needed or the game is reset.
    */
   destroy(): void {
+    // Ensure the ability is deactivated first
+    if (this.active) {
+      this.deactivate();
+    }
+    
+    // Clean up visual effects
     if (this.visualEffect && this.visualEffect.parentNode) {
       this.visualEffect.parentNode.removeChild(this.visualEffect);
       this.visualEffect = null;
     }
+    
+    // Note: We don't remove the element from the UI here
+    // as that's handled by the UI management system
   }
 
   /**

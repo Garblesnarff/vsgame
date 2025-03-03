@@ -384,40 +384,58 @@ export class Game {
   }
 
   /**
-   * Restart the game
-   */
-  restart(): void {
-    // Clean up existing entities
-    this.cleanupEntities();
-
-    // Reset player
-    this.player.destroy();
-    this.player = new Player(this.gameContainer, this);
-
-    // Reset level system
-    this.levelSystem = new LevelSystem(this.player);
-    this.levelSystem.onLevelUp((_level) => {
-      this.player.skillPoints++;
-      this.handleLevelUp();
-    });
-
-    // Initialize player abilities
-    this.player.abilityManager.initializeUI();
-
-    // Reset game systems
-    this.gameTime = 0;
-    this.spawnSystem.reset();
-    this.particleSystem.reset();
-
-    // Reset UI
-    this.uiManager.reset();
-
-    // Start game loop
-    this.gameLoop.start(this.update.bind(this));
-
-    // Emit game restart event
-    GameEvents.emit(EVENTS.GAME_RESTART, this);
+ * Restart the game
+ */
+restart(): void {
+  // Deactivate all abilities before cleanup
+  if (this.player && this.player.abilityManager) {
+    const abilities = this.player.abilityManager.abilities;
+    for (const ability of abilities.values()) {
+      if (ability.isActive()) {
+        if (typeof ability.deactivate === 'function') {
+          ability.deactivate();
+        } else {
+          ability.active = false;
+        }
+      }
+    }
   }
+
+  // Clean up existing entities
+  this.cleanupEntities();
+
+  // Reset player
+  if (this.player) {
+    this.player.destroy();
+  }
+  this.player = new Player(this.gameContainer, this);
+
+  // Reset level system
+  this.levelSystem = new LevelSystem(this.player);
+  
+  // Register level up handler for the new level system
+  this.levelSystem.onLevelUp((_level) => {
+    this.player.skillPoints++;
+    this.handleLevelUp();
+  });
+
+  // Initialize player abilities
+  this.player.abilityManager.initializeUI();
+
+  // Reset game systems
+  this.gameTime = 0;
+  this.spawnSystem.reset();
+  this.particleSystem.reset();
+
+  // Reset UI
+  this.uiManager.reset();
+
+  // Start game loop
+  this.gameLoop.start(this.update.bind(this));
+
+  // Emit game restart event
+  GameEvents.emit(EVENTS.GAME_RESTART, this);
+}
 
   /**
    * Clean up all game entities
@@ -437,6 +455,42 @@ export class Game {
 
     // Clean up particles
     this.particleSystem.reset();
+
+    // Clean up any DOM elements that might have been missed
+    const bloodNovas = document.querySelectorAll('.blood-nova');
+    bloodNovas.forEach(element => {
+      if (element.parentNode) {
+        element.parentNode.removeChild(element);
+      }
+    });
+
+    const bloodDrainAOEs = document.querySelectorAll('.blood-drain-aoe');
+    bloodDrainAOEs.forEach(element => {
+      if (element.parentNode) {
+        element.parentNode.removeChild(element);
+      }
+    });
+
+    const bats = document.querySelectorAll('.bat');
+    bats.forEach(element => {
+      if (element.parentNode) {
+        element.parentNode.removeChild(element);
+      }
+    });
+
+    const shadowTrails = document.querySelectorAll('.shadow-trail');
+    shadowTrails.forEach(element => {
+      if (element.parentNode) {
+        element.parentNode.removeChild(element);
+      }
+    });
+
+    const bloodParticles = document.querySelectorAll('.blood-particle');
+    bloodParticles.forEach(element => {
+      if (element.parentNode) {
+        element.parentNode.removeChild(element);
+      }
+    });
   }
 
   /**

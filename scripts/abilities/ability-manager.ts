@@ -176,12 +176,23 @@ export class AbilityManager {
    * Reset all abilities to initial state
    */
   reset(): void {
+    // Deactivate all active abilities first
+    for (const ability of this.abilities.values()) {
+      if (ability.isActive()) {
+        if (typeof ability.deactivate === 'function') {
+          ability.deactivate();
+        } else {
+          ability.active = false;
+        }
+      }
+    }
+
     // Clean up ability resources
     for (const ability of this.abilities.values()) {
       ability.destroy();
     }
 
-    // Reinitialize abilities
+    // Clear the current abilities map and reinitialize
     this.abilities.clear();
     this.initializeAbilities();
   }

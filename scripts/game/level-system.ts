@@ -1,5 +1,6 @@
 import CONFIG from "../config";
 import { Player } from "../entities/player";
+import { GameEvents, EVENTS } from "../utils/event-system";
 
 /**
  * Type for level up callback function
@@ -7,11 +8,19 @@ import { Player } from "../entities/player";
 type LevelUpCallback = (level: number) => void;
 
 /**
+ * Type augmentation for Player to make TypeScript happy
+ */
+interface ExtendedPlayer extends Player {
+  levelSystem?: LevelSystem;
+  setLevelSystem?(levelSystem: LevelSystem): void;
+}
+
+/**
  * Level System
  * Manages player level progression, experience, and level-up events
  */
 export class LevelSystem {
-  player: Player;
+  player: ExtendedPlayer;
   level: number;
   kills: number;
   killsToNextLevel: number;
@@ -22,11 +31,30 @@ export class LevelSystem {
    * @param player - The player associated with this level system
    */
   constructor(player: Player) {
-    this.player = player;
-    this.level = 1;
-    this.kills = 0;
-    this.killsToNextLevel = CONFIG.LEVEL.KILLS_FOR_LEVELS[1];
+    this.player = player as ExtendedPlayer;
+    this.level = player.level || 1;
+    this.kills = player.kills || 0;
+    this.killsToNextLevel = player.killsToNextLevel || CONFIG.LEVEL.KILLS_FOR_LEVELS[1];
     this.levelUpCallbacks = [];
+    
+    // Set the level system reference on the player
+    if ((player as any).setLevelSystem) {
+      (player as any).setLevelSystem(this);
+    }
+    
+    // Subscribe to kill events
+    this.setupEventListeners();
+  }
+  
+  /**
+   * Set up event listeners for game events
+   */
+  setupEventListeners(): void {
+    // Listen for enemy death events to increment kills
+    GameEvents.on(EVENTS.ENEMY_DEATH, () => {
+      // Note: We don't directly add kills here since it's also
+      // handled in the Game class updateProjectiles method
+    });
   }
 
   /**
@@ -35,6 +63,9 @@ export class LevelSystem {
    */
   addKill(): boolean {
     this.kills++;
+    
+    // Update the player's kills to keep them in sync
+    this.player.kills = this.kills;
 
     if (
       this.level < CONFIG.LEVEL.KILLS_FOR_LEVELS.length - 1 &&
@@ -52,6 +83,9 @@ export class LevelSystem {
    */
   levelUp(): void {
     this.level++;
+    
+    // Update the player's level to keep them in sync
+    this.player.level = this.level;
 
     // Update next level threshold
     if (this.level < CONFIG.LEVEL.KILLS_FOR_LEVELS.length - 1) {
@@ -68,9 +102,15 @@ export class LevelSystem {
           ]) +
         CONFIG.LEVEL.KILLS_INCREASE_PER_LEVEL;
     }
+    
+    // Update player's killsToNextLevel to keep them in sync
+    this.player.killsToNextLevel = this.killsToNextLevel;
 
     // Notify all registered callbacks of the level up event
     this.levelUpCallbacks.forEach((callback) => callback(this.level));
+    
+    // Emit level up event
+    GameEvents.emit(EVENTS.PLAYER_LEVEL_UP, this.level, this.player);
   }
 
   /**
@@ -112,6 +152,11 @@ export class LevelSystem {
     this.level = 1;
     this.kills = 0;
     this.killsToNextLevel = CONFIG.LEVEL.KILLS_FOR_LEVELS[1];
+    
+    // Update the player's stats to keep them in sync
+    this.player.level = this.level;
+    this.player.kills = this.kills;
+    this.player.killsToNextLevel = this.killsToNextLevel;
   }
 }
 

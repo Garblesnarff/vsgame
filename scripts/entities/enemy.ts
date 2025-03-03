@@ -152,8 +152,8 @@ export class Enemy {
       createParticles(this.x + this.width / 2, this.y + this.height / 2, 5);
     }
 
-    // Return whether the enemy died
-    return this.health <= 0;
+    // Return whether the enemy died - use a small threshold to account for floating point errors
+    return this.health <= 0.001;
   }
 
   /**

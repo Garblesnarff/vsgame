@@ -13,6 +13,7 @@ export class BloodDrain extends Ability {
   healAmount: number;
   duration: number;
   activeSince: number;
+  bloodNovas: Particle[]; // Track created blood novas
 
   /**
    * Create a new Blood Drain ability
@@ -36,6 +37,7 @@ export class BloodDrain extends Ability {
     this.healAmount = config.HEAL_AMOUNT;
     this.duration = config.DURATION;
     this.activeSince = 0;
+    this.bloodNovas = [];
   }
 
   /**
@@ -64,6 +66,7 @@ export class BloodDrain extends Ability {
   activate(): void {
     this.active = true;
     this.activeSince = Date.now();
+    this.bloodNovas = []; // Clear any previously tracked blood novas
 
     // Create visual effect for the blood drain area
     this.visualEffect = document.createElement("div");
@@ -81,7 +84,9 @@ export class BloodDrain extends Ability {
 
     // Deactivate after duration
     setTimeout(() => {
-      this.deactivate();
+      if (this.active) {
+        this.deactivate();
+      }
     }, this.duration);
   }
 
@@ -96,6 +101,31 @@ export class BloodDrain extends Ability {
       this.visualEffect.parentNode.removeChild(this.visualEffect);
       this.visualEffect = null;
     }
+
+    // Clean up any blood novas we created
+    for (const nova of this.bloodNovas) {
+      if (nova.element && nova.element.parentNode) {
+        nova.element.parentNode.removeChild(nova.element);
+      }
+    }
+    this.bloodNovas = [];
+
+    // Clean up any blood nova elements that were missed
+    const bloodNovaElements = document.querySelectorAll('.blood-nova');
+    bloodNovaElements.forEach(element => {
+      if (element.parentNode) {
+        element.parentNode.removeChild(element);
+      }
+    });
+  }
+
+  /**
+   * Clean up ability resources
+   */
+  destroy(): void {
+    // Ensure we deactivate first (which handles blood nova cleanup)
+    this.deactivate();
+    super.destroy();
   }
 
   /**
@@ -119,11 +149,22 @@ export class BloodDrain extends Ability {
 
     // Create pulsing effect around player (occasionally)
     if (Math.random() < 0.1) {
-      Particle.createBloodNova(
-        this.player.gameContainer,
-        this.player.x + this.player.width / 2,
-        this.player.y + this.player.height / 2
-      );
+      // Use particle system if available through player.game
+      if (this.player.game && this.player.game.particleSystem) {
+        const nova = this.player.game.particleSystem.createBloodNova(
+          this.player.x + this.player.width / 2,
+          this.player.y + this.player.height / 2
+        );
+        this.bloodNovas.push(nova);
+      } else {
+        // Fallback to direct creation
+        const nova = Particle.createBloodNova(
+          this.player.gameContainer,
+          this.player.x + this.player.width / 2,
+          this.player.y + this.player.height / 2
+        );
+        this.bloodNovas.push(nova);
+      }
     }
 
     // Process enemies within range
@@ -159,7 +200,11 @@ export class BloodDrain extends Ability {
       if (dist <= range) {
         // Enemy is in range of blood drain
         enemy.takeDamage(damage, (x, y, count) => {
-          Particle.createBloodParticles(this.player.gameContainer, x, y, count);
+          if (this.player.game && this.player.game.particleSystem) {
+            this.player.game.particleSystem.createBloodParticles(x, y, count);
+          } else {
+            Particle.createBloodParticles(this.player.gameContainer, x, y, count);
+          }
         });
 
         // Track that we applied healing
@@ -167,12 +212,20 @@ export class BloodDrain extends Ability {
 
         // Create blood particles flowing from enemy to player (occasionally)
         if (Math.random() < 0.2) {
-          Particle.createBloodParticles(
-            this.player.gameContainer,
-            enemy.x + enemy.width / 2,
-            enemy.y + enemy.height / 2,
-            1
-          );
+          if (this.player.game && this.player.game.particleSystem) {
+            this.player.game.particleSystem.createBloodParticles(
+              enemy.x + enemy.width / 2,
+              enemy.y + enemy.height / 2,
+              1
+            );
+          } else {
+            Particle.createBloodParticles(
+              this.player.gameContainer,
+              enemy.x + enemy.width / 2,
+              enemy.y + enemy.height / 2,
+              1
+            );
+          }
         }
       }
     }

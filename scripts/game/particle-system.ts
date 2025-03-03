@@ -139,6 +139,14 @@ export class ParticleSystem {
       trail.destroy();
     }
     this.shadowTrails = [];
+
+    // Use querySelector for any other particles that might have been missed
+    const allParticles = this.gameContainer.querySelectorAll('.blood-particle, .blood-nova, .shadow-trail');
+    allParticles.forEach(element => {
+      if (element.parentNode) {
+        element.parentNode.removeChild(element);
+      }
+    });
   }
 }
 
