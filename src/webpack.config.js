@@ -8,7 +8,7 @@ module.exports = (env, argv) => {
   
   return {
     mode: isProduction ? 'production' : 'development',
-    entry: './scripts/main.js',
+    entry: './src/scripts/main.ts',
     output: {
       path: path.resolve(__dirname, 'dist'),
       filename: 'js/[name].[contenthash].js',
@@ -65,7 +65,7 @@ module.exports = (env, argv) => {
     plugins: [
       new CleanWebpackPlugin(),
       new HtmlWebpackPlugin({
-        template: 'index.html',
+        template: './src/index.html',
         filename: 'index.html',
         inject: 'body',
         minify: isProduction ? {
@@ -83,7 +83,7 @@ module.exports = (env, argv) => {
       }),
       new CopyWebpackPlugin({
         patterns: [
-          { from: 'styles', to: 'styles' },
+          { from: 'src/styles', to: 'styles' },
           { from: 'assets', to: 'assets', noErrorOnMissing: true }
         ]
       })
@@ -103,7 +103,7 @@ module.exports = (env, argv) => {
     },
     devServer: {
       static: {
-        directory: path.join(__dirname, '/')
+        directory: path.join(__dirname, 'src')
       },
       hot: true,
       compress: true,
