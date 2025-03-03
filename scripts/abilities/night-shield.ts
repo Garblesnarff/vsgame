@@ -106,10 +106,10 @@ export class NightShield extends Ability {
 
   /**
    * Update the shield position and health display
-   * @param deltaTime - Time since last update
-   * @param enemies - Array of enemies (not used directly but required by base class)
+   * @param _deltaTime - Time since last update
+   * @param _enemies - Array of enemies (not used directly but required by base class)
    */
-  update(deltaTime: number, enemies: Enemy[] = []): void {
+  update(_deltaTime: number, _enemies: Enemy[] = []): void {
     if (!this.active || !this.shieldElement) {
       return;
     }

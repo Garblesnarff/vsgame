@@ -9,9 +9,8 @@ import { ParticleSystem } from "./particle-system";
 import { LevelSystem } from "./level-system";
 import { GameStateManager, defaultStateHandlers } from "./state-manager";
 import { GameEvents, EVENTS } from "../utils/event-system";
-import Collision from "../utils/collision";
-import { GameState, StateHandler, StateHandlers } from "./../types/game-types";
 import CONFIG from "../config";
+import { GameState } from "../types/game-types";
 
 /**
  * Main Game class that orchestrates all game systems
@@ -66,7 +65,7 @@ export class Game {
     this.stateManager.registerStates(defaultStateHandlers);
 
     // Register level up handler
-    this.levelSystem.onLevelUp((level) => {
+    this.levelSystem.onLevelUp((_level) => {
       this.player.skillPoints++;
       this.handleLevelUp();
     });
@@ -200,9 +199,9 @@ export class Game {
 
   /**
    * Update enemy movement and check for collisions
-   * @param deltaTime - Time since last update in ms
+   * @param _deltaTime - Time since last update in ms
    */
-  updateEnemies(deltaTime: number): void {
+  updateEnemies(_deltaTime: number): void {
     for (let i = this.enemies.length - 1; i >= 0; i--) {
       const enemy = this.enemies[i];
 
@@ -397,7 +396,7 @@ export class Game {
 
     // Reset level system
     this.levelSystem = new LevelSystem(this.player);
-    this.levelSystem.onLevelUp((level) => {
+    this.levelSystem.onLevelUp((_level) => {
       this.player.skillPoints++;
       this.handleLevelUp();
     });
@@ -571,8 +570,5 @@ export class Game {
     return this.stateManager.getCurrentState();
   }
 }
-
-// Import GameState here to fix the circular dependency
-//import { GameState } from "../types/game-types.js";
 
 export default Game;

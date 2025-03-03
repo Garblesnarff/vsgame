@@ -68,7 +68,12 @@ export class BloodLance extends Ability {
     const targetInfo = this.findTarget();
 
     // Create the blood lance projectile
-    this.createLance(targetInfo.angle);
+    this.createLance({
+      angle: targetInfo.angle, x: this.player.x + this.player.width / 2, y: this.player.y + this.player.height / 2,
+      vx: 0,
+      vy: 0,
+      damage: 0
+    });
 
     return true;
   }
@@ -137,23 +142,25 @@ export class BloodLance extends Ability {
 
   /**
    * Create the blood lance projectile
-   * @param angle - Direction angle in radians
+   * @param options - Options for the projectile
    */
-  createLance(angle: number): void {
+  createLance(options: ProjectileOptions): void {
+    
+    const {angle, x, y} = options;
+
+    if(!angle || !x || !y) return;
+
+
     // Use the game's createProjectile method if available
     if (this.player.game && this.player.game.createProjectile) {
       this.player.game.createProjectile({
-        x: this.player.x + this.player.width / 2,
-        y: this.player.y + this.player.height / 2,
+        x: x,
+        y: y,
         vx: Math.cos(angle) * this.speed,
         vy: Math.sin(angle) * this.speed,
         damage: this.getScaledDamage(),
         isBloodLance: true,
         isAutoAttack: false,
-        pierce: this.getScaledPierce(),
-        pierceCount: 0,
-        healAmount: this.getScaledHealing(),
-        hitEnemies: new Set<string>(),
         className: "blood-lance",
         angle: angle,
       });
@@ -161,42 +168,6 @@ export class BloodLance extends Ability {
       // Fallback if game method not available
       this.createFallbackLance(angle);
     }
-  }
-
-  /**
-   * Create a fallback lance if the game's projectile system isn't available
-   * @param angle - Direction angle in radians
-   */
-  createFallbackLance(angle: number): void {
-    const lanceElement = document.createElement("div");
-    lanceElement.className = "blood-lance";
-    lanceElement.style.left = this.player.x + this.player.width / 2 + "px";
-    lanceElement.style.top = this.player.y + this.player.height / 2 + "px";
-    lanceElement.style.transform = `rotate(${angle}rad)`;
-
-    this.player.gameContainer.appendChild(lanceElement);
-
-    // Animate the lance
-    let x = this.player.x + this.player.width / 2;
-    let y = this.player.y + this.player.height / 2;
-    const vx = Math.cos(angle) * this.speed;
-    const vy = Math.sin(angle) * this.speed;
-
-    const moveInterval = setInterval(() => {
-      x += vx;
-      y += vy;
-
-      lanceElement.style.left = x + "px";
-      lanceElement.style.top = y + "px";
-
-      // Remove when out of bounds
-      if (x < 0 || x > window.innerWidth || y < 0 || y > window.innerHeight) {
-        clearInterval(moveInterval);
-        if (lanceElement.parentNode) {
-          lanceElement.parentNode.removeChild(lanceElement);
-        }
-      }
-    }, 16); // ~60fps
   }
 
   /**

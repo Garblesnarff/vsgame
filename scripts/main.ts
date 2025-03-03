@@ -1,6 +1,5 @@
 import { Game } from "./game/game";
 import { GameEvents, EVENTS } from "./utils/event-system";
-import { CONFIG } from "./config";
 
 /**
  * Main entry point for the Vampire Survival Game

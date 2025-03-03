@@ -1,5 +1,5 @@
 import { GameEvents, EVENTS } from "../utils/event-system";
-import { GameState, StateHandler, StateHandlers } from "../types/game-types";
+import { GameState, StateHandlers } from "../types/game-types";
 import { Game } from "./game";
 
 /**
@@ -183,7 +183,7 @@ export const defaultStateHandlers: StateHandlers = {
         game.gameLoop.pauseGame(game.gameContainer);
       }
     },
-    exit: (game: Game) => {
+    exit: (_game: Game) => {
       console.log("Exiting LOADING state");
       // Hide loading screen
       const loadingScreen = document.getElementById("loading-screen");
@@ -191,7 +191,7 @@ export const defaultStateHandlers: StateHandlers = {
         loadingScreen.parentNode.removeChild(loadingScreen);
       }
     },
-    update: (game: Game, deltaTime: number) => {
+    update: (_game: Game, _deltaTime: number) => {
       // Loading state update (e.g., update progress bar)
     },
   },
@@ -257,7 +257,7 @@ export const defaultStateHandlers: StateHandlers = {
         game.gameLoop.resumeGame();
       }
     },
-    update: (game: Game, deltaTime: number) => {
+    update: (_game: Game, _deltaTime: number) => {
       // Main menu update (e.g., animate background)
     },
   },
@@ -280,11 +280,11 @@ export const defaultStateHandlers: StateHandlers = {
         pauseOverlay.style.display = "none";
       }
     },
-    exit: (game: Game) => {
+    exit: (_game: Game) => {
       console.log("Exiting PLAYING state");
       // No special exit logic needed for now
     },
-    update: (game: Game, deltaTime: number) => {
+    update: (_game: Game, _deltaTime: number) => {
       // Game is updated in the main loop
     },
   },
@@ -301,11 +301,11 @@ export const defaultStateHandlers: StateHandlers = {
         game.gameLoop.pauseGame(game.gameContainer);
       }
     },
-    exit: (game: Game) => {
+    exit: (_game: Game) => {
       console.log("Exiting PAUSED state");
       // No special exit logic needed
     },
-    update: (game: Game, deltaTime: number) => {
+    update: (_game: Game, _deltaTime: number) => {
       // No updates while paused
     },
   },
@@ -335,7 +335,7 @@ export const defaultStateHandlers: StateHandlers = {
         game.gameLoop.resumeGame();
       }
     },
-    update: (game: Game, deltaTime: number) => {
+    update: (_game: Game, _deltaTime: number) => {
       // No updates while in skill menu
     },
   },
@@ -350,11 +350,11 @@ export const defaultStateHandlers: StateHandlers = {
 
       // This is handled by the UI manager showing the game over screen
     },
-    exit: (game: Game) => {
+    exit: (_game: Game) => {
       console.log("Exiting GAME_OVER state");
       // This happens when restarting
     },
-    update: (game: Game, deltaTime: number) => {
+    update: (_game: Game, _deltaTime: number) => {
       // No updates in game over state
     },
   },

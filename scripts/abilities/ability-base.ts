@@ -314,10 +314,10 @@ export class Ability {
    * This method is meant to be overridden by subclasses to implement
    * the specific update logic for each ability type.
    *
-   * @param deltaTime - Time in milliseconds since the last update
-   * @param enemies - List of enemies in the game (optional)
+   * @param _deltaTime - Time in milliseconds since the last update
+   * @param _enemies - List of enemies in the game (optional)
    */
-  update(deltaTime: number, enemies: Enemy[] = []): void {
+  update(_deltaTime: number, _enemies: Enemy[] = []): void {
     // Base implementation does nothing
     // Override in subclasses to implement ability-specific behavior
   }

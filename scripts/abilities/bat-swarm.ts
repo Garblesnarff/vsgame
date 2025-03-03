@@ -96,10 +96,10 @@ export class BatSwarm extends Ability {
 
   /**
    * Update bat positions and check for collisions
-   * @param deltaTime - Time since last update
+   * @param _deltaTime - Time since last update
    * @param enemies - Array of enemy objects
    */
-  update(deltaTime: number, enemies: Enemy[] = []): void {
+  update(_deltaTime: number, enemies: Enemy[] = []): void {
     if (this.bats.length === 0) {
       return;
     }
