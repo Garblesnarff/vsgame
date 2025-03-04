@@ -54,6 +54,9 @@ export class BatSwarm extends Ability {
       return false;
     }
 
+    // Set ability as active so update() will be called
+    this.active = true;
+
     // Create bats in all directions
     const batCount = this.getScaledCount();
     const angleStep = (2 * Math.PI) / batCount;
@@ -101,6 +104,8 @@ export class BatSwarm extends Ability {
    */
   update(_deltaTime: number, enemies: Enemy[] = []): void {
     if (this.bats.length === 0) {
+      // No more bats, deactivate the ability
+      this.active = false;
       return;
     }
 

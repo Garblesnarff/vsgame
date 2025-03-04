@@ -172,8 +172,8 @@ export const CONFIG: GameConfig = {
     SPEED: 5,
     MAX_HEALTH: 100,
     MAX_ENERGY: 100,
-    ENERGY_REGEN: 0.5, // Increased from 0.2 to match original implementation
-    ATTACK_COOLDOWN: 500, // ms
+    ENERGY_REGEN: 10, // Increased from 0.2 to match original implementation
+    ATTACK_COOLDOWN: 350, // ms
     PROJECTILE_SPEED: 8,
     MANUAL_PROJECTILE_DAMAGE: 25,
   },

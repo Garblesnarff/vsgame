@@ -189,6 +189,8 @@ export class BloodDrain extends Ability {
     const healing = this.getScaledHealing() * (deltaTime / 1000);
 
     let healingApplied = false;
+    let particlesCreated = 0;
+    const maxParticlesPerFrame = 5; // Limit particles per frame
 
     for (const enemy of enemies) {
       const dx =
@@ -200,10 +202,14 @@ export class BloodDrain extends Ability {
       if (dist <= range) {
         // Enemy is in range of blood drain
         enemy.takeDamage(damage, (x, y, count) => {
-          if (this.player.game && this.player.game.particleSystem) {
-            this.player.game.particleSystem.createBloodParticles(x, y, count);
-          } else {
-            Particle.createBloodParticles(this.player.gameContainer, x, y, count);
+          // Limit particle creation
+          if (particlesCreated < maxParticlesPerFrame) {
+            if (this.player.game && this.player.game.particleSystem) {
+              this.player.game.particleSystem.createBloodParticles(x, y, Math.min(count, 2));
+            } else {
+              Particle.createBloodParticles(this.player.gameContainer, x, y, Math.min(count, 2));
+            }
+            particlesCreated++;
           }
         });
 
@@ -211,7 +217,8 @@ export class BloodDrain extends Ability {
         healingApplied = true;
 
         // Create blood particles flowing from enemy to player (occasionally)
-        if (Math.random() < 0.2) {
+        // Reduced probability from 0.2 to 0.05 to limit particles
+        if (Math.random() < 0.05 && particlesCreated < maxParticlesPerFrame) {
           if (this.player.game && this.player.game.particleSystem) {
             this.player.game.particleSystem.createBloodParticles(
               enemy.x + enemy.width / 2,
@@ -226,6 +233,7 @@ export class BloodDrain extends Ability {
               1
             );
           }
+          particlesCreated++;
         }
       }
     }

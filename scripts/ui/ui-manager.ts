@@ -227,19 +227,31 @@ export class UIManager {
     }
   }
 
-  /**
-   * Reset the UI to initial state
-   */
-  reset(): void {
-    // Reset all UI components
-    this.statsDisplay.reset();
-    this.abilityBar.reset();
-    this.skillMenu.reset();
-    this.screensManager.hideAll();
+/**
+ * Reset the UI to initial state
+ */
+reset(): void {
+  // Reset all UI components with proper player references
+  this.statsDisplay.setPlayer(this.player);
+  this.statsDisplay.reset();
+  
+  // Reset ability bar with new player's abilities
+  this.abilityBar = new AbilityBar(this.gameContainer, this.player.abilityManager);
+  this.abilityBar.reset();
+  
+  // Reset skill menu with new player reference
+  this.skillMenu.player = this.player;
+  this.skillMenu.reset();
+  
+  // Reset screens
+  this.screensManager.hideAll();
 
-    // Reset auto-attack toggle
-    this.updateAutoAttackToggle();
-  }
+  // Reset auto-attack toggle
+  this.updateAutoAttackToggle();
+  
+  // Force immediate update to refresh all UI elements
+  this.update();
+}
 }
 
 export default UIManager;

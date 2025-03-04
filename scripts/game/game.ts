@@ -383,7 +383,7 @@ export class Game {
     GameEvents.emit(EVENTS.GAME_OVER, this);
   }
 
-  /**
+/**
  * Restart the game
  */
 restart(): void {
@@ -427,8 +427,26 @@ restart(): void {
   this.spawnSystem.reset();
   this.particleSystem.reset();
 
+  // Update UI manager with new player reference
+  if (this.uiManager) {
+    this.uiManager.player = this.player;
+    
+    // Update stats display with new player reference
+    if (this.uiManager.statsDisplay) {
+      this.uiManager.statsDisplay.player = this.player;
+    }
+    
+    // Update ability bar with new ability manager
+    if (this.uiManager.abilityBar) {
+      this.uiManager.abilityBar.abilityManager = this.player.abilityManager;
+    }
+  }
+
   // Reset UI
   this.uiManager.reset();
+
+  // Force an immediate UI update
+  this.uiManager.update();
 
   // Start game loop
   this.gameLoop.start(this.update.bind(this));

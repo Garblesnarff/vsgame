@@ -83,24 +83,24 @@ export class AbilityManager {
     return this.abilities.get(name);
   }
 
-  /**
-   * Update all abilities
-   * @param deltaTime - Time since last update
-   * @param enemies - Array of enemies in the game
-   */
-  update(deltaTime: number, enemies: Enemy[] = []): void {
-    // Update cooldown displays
-    for (const ability of this.abilities.values()) {
-      ability.updateCooldownDisplay();
-    }
+/**
+ * Update all abilities
+ * @param deltaTime - Time since last update
+ * @param enemies - Array of enemies in the game
+ */
+update(deltaTime: number, enemies: Enemy[] = []): void {
+  // Update cooldown displays
+  for (const ability of this.abilities.values()) {
+    ability.updateCooldownDisplay();
+  }
 
-    // Update active abilities
-    for (const ability of this.abilities.values()) {
-      if (ability.isActive()) {
-        ability.update(deltaTime, enemies);
-      }
+  // Update active abilities
+  for (const ability of this.abilities.values()) {
+    if (ability.isActive()) {
+      ability.update(deltaTime, enemies);
     }
   }
+}
 
   /**
    * Check if abilities can be unlocked based on player level

@@ -95,11 +95,12 @@ export class StatsDisplay {
       return;
     }
 
-    // Update health and energy bars
-    this.healthBar.style.width =
-      (this.player.health / this.player.maxHealth) * 100 + "%";
-    this.energyBar.style.width =
-      (this.player.energy / this.player.maxEnergy) * 100 + "%";
+    // Update health and energy bars - Add explicit conversion to percentage
+    const healthPercent = Math.max(0, Math.min(100, (this.player.health / this.player.maxHealth) * 100));
+    const energyPercent = Math.max(0, Math.min(100, (this.player.energy / this.player.maxEnergy) * 100));
+    
+    this.healthBar.style.width = healthPercent + "%";
+    this.energyBar.style.width = energyPercent + "%";
 
     // Update time display
     if (this.timeElement) {
@@ -145,7 +146,7 @@ export class StatsDisplay {
    * Reset the stats display
    */
   reset(): void {
-    // Reset to initial values
+    // Reset to initial values with explicit percentages
     if (this.healthBar) {
       this.healthBar.style.width = "100%";
     }
@@ -169,6 +170,18 @@ export class StatsDisplay {
     if (this.skillPointsCount) {
       this.skillPointsCount.textContent = "0";
     }
+
+    // Force update with latest player stats
+    this.update(0);
+  }
+
+  /**
+   * Set a new player reference
+   * @param player - New player object
+   */
+  setPlayer(player: Player): void {
+    this.player = player as ExtendedPlayer;
+    this.update(0); // Force immediate update with new player
   }
 }
 
