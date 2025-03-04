@@ -192,7 +192,9 @@ export class BloodDrain extends Ability {
     let particlesCreated = 0;
     const maxParticlesPerFrame = 5; // Limit particles per frame
 
-    for (const enemy of enemies) {
+    for (let i = enemies.length - 1; i >= 0; i--) {
+      const enemy = enemies[i];
+      
       const dx =
         enemy.x + enemy.width / 2 - (this.player.x + this.player.width / 2);
       const dy =
@@ -201,7 +203,7 @@ export class BloodDrain extends Ability {
 
       if (dist <= range) {
         // Enemy is in range of blood drain
-        enemy.takeDamage(damage, (x, y, count) => {
+        const enemyDied = enemy.takeDamage(damage, (x, y, count) => {
           // Limit particle creation
           if (particlesCreated < maxParticlesPerFrame) {
             if (this.player.game && this.player.game.particleSystem) {
@@ -216,24 +218,33 @@ export class BloodDrain extends Ability {
         // Track that we applied healing
         healingApplied = true;
 
-        // Create blood particles flowing from enemy to player (occasionally)
-        // Reduced probability from 0.2 to 0.05 to limit particles
-        if (Math.random() < 0.05 && particlesCreated < maxParticlesPerFrame) {
-          if (this.player.game && this.player.game.particleSystem) {
-            this.player.game.particleSystem.createBloodParticles(
-              enemy.x + enemy.width / 2,
-              enemy.y + enemy.height / 2,
-              1
-            );
-          } else {
-            Particle.createBloodParticles(
-              this.player.gameContainer,
-              enemy.x + enemy.width / 2,
-              enemy.y + enemy.height / 2,
-              1
-            );
+        // Handle enemy death
+        if (enemyDied) {
+          if (enemy.element && enemy.element.parentNode) {
+            enemy.element.parentNode.removeChild(enemy.element);
           }
-          particlesCreated++;
+          enemies.splice(i, 1);
+          this.player.addKill();
+        } else {
+          // Create blood particles flowing from enemy to player (occasionally)
+          // Reduced probability from 0.2 to 0.05 to limit particles
+          if (Math.random() < 0.05 && particlesCreated < maxParticlesPerFrame) {
+            if (this.player.game && this.player.game.particleSystem) {
+              this.player.game.particleSystem.createBloodParticles(
+                enemy.x + enemy.width / 2,
+                enemy.y + enemy.height / 2,
+                1
+              );
+            } else {
+              Particle.createBloodParticles(
+                this.player.gameContainer,
+                enemy.x + enemy.width / 2,
+                enemy.y + enemy.height / 2,
+                1
+              );
+            }
+            particlesCreated++;
+          }
         }
       }
     }

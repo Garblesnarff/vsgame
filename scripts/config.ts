@@ -215,8 +215,8 @@ export const CONFIG: GameConfig = {
     BAT_SWARM: {
       COOLDOWN: 8000, // ms
       ENERGY_COST: 40,
-      COUNT: 16,
-      DAMAGE: 200,
+      COUNT: 24,
+      DAMAGE: 2000,
       SPEED: 6,
       MAX_LEVEL: 5,
     },

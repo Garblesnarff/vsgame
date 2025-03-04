@@ -214,7 +214,7 @@ export class BatSwarm extends Ability {
    * @returns Scaled damage
    */
   getScaledDamage(): number {
-    return this.damage + (this.level - 1) * 50;
+    return this.damage + (this.level) * 50;
   }
 
   /**
