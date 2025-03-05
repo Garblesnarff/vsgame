@@ -59,7 +59,7 @@ export class Game {
 
     // Create level system
     this.levelSystem = new LevelSystem(this.player);
-
+    this.player.setLevelSystem(this.levelSystem);
     // Create state manager
     this.stateManager = new GameStateManager(this);
     this.stateManager.registerStates(defaultStateHandlers);
@@ -352,25 +352,35 @@ export class Game {
   }
 
   /**
-   * Handle player level up
-   */
-  handleLevelUp(): void {
-    // Show level up notification
-    this.uiManager.showLevelUp();
+ * Handle player level up
+ */
+handleLevelUp(): void {
+  // Show level up notification
+  this.uiManager.showLevelUp();
 
-    // Update spawn rate
-    const playerLevel = this.player?.level ?? 1; // Handle potentially undefined level
-    this.spawnSystem.currentSpawnRate = Math.max(
-      500,
-      CONFIG.SPAWN_RATE - playerLevel * 200
-    );
+  // Update spawn rate
+  const playerLevel = this.player.level;
+  this.spawnSystem.currentSpawnRate = Math.max(
+    500,
+    CONFIG.SPAWN_RATE - playerLevel * 200
+  );
 
-    // Check for unlockable abilities
-    this.player.abilityManager.checkUnlockableAbilities();
+  // Check for unlockable abilities
+  this.player.abilityManager.checkUnlockableAbilities();
+  
+  // Debug info
+  console.debug(`Level up handled. New level: ${playerLevel}`);
+  console.debug(`Blood Lance unlock level: ${CONFIG.ABILITIES.BLOOD_LANCE.UNLOCK_LEVEL}`);
+  console.debug(`Night Shield unlock level: ${CONFIG.ABILITIES.NIGHT_SHIELD.UNLOCK_LEVEL}`);
 
-    // Heal player slightly
-    this.player.heal(20);
+  // Also trigger skill menu to update in case it's open
+  if (this.player.showingSkillMenu && this.uiManager.skillMenu) {
+    this.uiManager.skillMenu.update();
   }
+
+  // Heal player slightly
+  this.player.heal(20);
+}
 
   /**
    * Game over logic

@@ -684,69 +684,81 @@ export class SkillMenu {
   }
 
   /**
-   * Update unlockable ability buttons
-   */
-  updateUnlockableAbilityButtons(): void {
-    const player = this.player;
-    const abilities = player.abilityManager.abilities;
+ * Update unlockable ability buttons
+ */
+updateUnlockableAbilityButtons(): void {
+  const player = this.player;
+  const abilities = player.abilityManager.abilities;
+  
+  // Get player level from level system if available, or fallback to player.level
+  let playerLevel = player.level;
+  
+  // Safety check in case level is undefined for some reason
+  if (typeof playerLevel !== 'number' || isNaN(playerLevel)) {
+    console.warn('Player level is undefined, defaulting to 1');
+    playerLevel = 1;
+  }
 
-    // Blood Lance
-    const bloodLance = abilities.get("bloodLance");
-    const bloodLanceUnlockLevel = CONFIG.ABILITIES.BLOOD_LANCE.UNLOCK_LEVEL;
-    const bloodLanceButton = document.getElementById(
-      "blood-lance-upgrade"
-    ) as HTMLButtonElement;
-    const bloodLanceLockedElement =
-      document.getElementById("blood-lance-locked");
+  // Blood Lance
+  const bloodLance = abilities.get("bloodLance");
+  const bloodLanceUnlockLevel = CONFIG.ABILITIES.BLOOD_LANCE.UNLOCK_LEVEL;
+  const bloodLanceButton = document.getElementById(
+    "blood-lance-upgrade"
+  ) as HTMLButtonElement;
+  const bloodLanceLockedElement =
+    document.getElementById("blood-lance-locked");
 
-    if (bloodLanceButton && bloodLanceLockedElement) {
-      if (player.level < bloodLanceUnlockLevel) {
-        // Not high enough level to unlock
-        bloodLanceButton.disabled = true;
-        bloodLanceLockedElement.style.display = "flex";
-      } else if (bloodLance.unlocked) {
-        // Already unlocked, check if can upgrade
-        bloodLanceButton.disabled =
-          player.skillPoints < 1 || bloodLance.level >= bloodLance.maxLevel;
-        bloodLanceButton.textContent = "Upgrade (1 Point)";
-        bloodLanceLockedElement.style.display = "none";
-      } else {
-        // Can unlock
-        bloodLanceButton.disabled = player.skillPoints < 3;
-        bloodLanceButton.textContent = "Unlock (3 Points)";
-        bloodLanceLockedElement.style.display = "none";
-      }
-    }
-
-    // Night Shield
-    const nightShield = abilities.get("nightShield");
-    const nightShieldUnlockLevel = CONFIG.ABILITIES.NIGHT_SHIELD.UNLOCK_LEVEL;
-    const nightShieldButton = document.getElementById(
-      "night-shield-upgrade"
-    ) as HTMLButtonElement;
-    const nightShieldLockedElement = document.getElementById(
-      "night-shield-locked"
-    );
-
-    if (nightShieldButton && nightShieldLockedElement) {
-      if (player.level < nightShieldUnlockLevel) {
-        // Not high enough level to unlock
-        nightShieldButton.disabled = true;
-        nightShieldLockedElement.style.display = "flex";
-      } else if (nightShield.unlocked) {
-        // Already unlocked, check if can upgrade
-        nightShieldButton.disabled =
-          player.skillPoints < 1 || nightShield.level >= nightShield.maxLevel;
-        nightShieldButton.textContent = "Upgrade (1 Point)";
-        nightShieldLockedElement.style.display = "none";
-      } else {
-        // Can unlock
-        nightShieldButton.disabled = player.skillPoints < 3;
-        nightShieldButton.textContent = "Unlock (3 Points)";
-        nightShieldLockedElement.style.display = "none";
-      }
+  if (bloodLanceButton && bloodLanceLockedElement) {
+    if (playerLevel < bloodLanceUnlockLevel) {
+      // Not high enough level to unlock
+      bloodLanceButton.disabled = true;
+      bloodLanceLockedElement.style.display = "flex";
+    } else if (bloodLance.unlocked) {
+      // Already unlocked, check if can upgrade
+      bloodLanceButton.disabled =
+        player.skillPoints < 1 || bloodLance.level >= bloodLance.maxLevel;
+      bloodLanceButton.textContent = "Upgrade (1 Point)";
+      bloodLanceLockedElement.style.display = "none";
+    } else {
+      // Can unlock
+      bloodLanceButton.disabled = player.skillPoints < 3;
+      bloodLanceButton.textContent = "Unlock (3 Points)";
+      bloodLanceLockedElement.style.display = "none";
     }
   }
+
+  // Night Shield
+  const nightShield = abilities.get("nightShield");
+  const nightShieldUnlockLevel = CONFIG.ABILITIES.NIGHT_SHIELD.UNLOCK_LEVEL;
+  const nightShieldButton = document.getElementById(
+    "night-shield-upgrade"
+  ) as HTMLButtonElement;
+  const nightShieldLockedElement = document.getElementById(
+    "night-shield-locked"
+  );
+
+  if (nightShieldButton && nightShieldLockedElement) {
+    if (playerLevel < nightShieldUnlockLevel) {
+      // Not high enough level to unlock
+      nightShieldButton.disabled = true;
+      nightShieldLockedElement.style.display = "flex";
+    } else if (nightShield.unlocked) {
+      // Already unlocked, check if can upgrade
+      nightShieldButton.disabled =
+        player.skillPoints < 1 || nightShield.level >= nightShield.maxLevel;
+      nightShieldButton.textContent = "Upgrade (1 Point)";
+      nightShieldLockedElement.style.display = "none";
+    } else {
+      // Can unlock
+      nightShieldButton.disabled = player.skillPoints < 3;
+      nightShieldButton.textContent = "Unlock (3 Points)";
+      nightShieldLockedElement.style.display = "none";
+    }
+  }
+  
+  // Debug output to help diagnose issues
+  console.debug(`Player level: ${playerLevel}, Blood Lance unlock level: ${bloodLanceUnlockLevel}, Night Shield unlock level: ${nightShieldUnlockLevel}`);
+}
 
   /**
    * Toggle the skill menu

@@ -103,39 +103,44 @@ update(deltaTime: number, enemies: Enemy[] = []): void {
 }
 
   /**
-   * Check if abilities can be unlocked based on player level
-   */
-  checkUnlockableAbilities(): void {
-    const bloodLance = this.abilities.get("bloodLance");
-    const nightShield = this.abilities.get("nightShield");
+ * Check if abilities can be unlocked based on player level
+ */
+checkUnlockableAbilities(): void {
+  const bloodLance = this.abilities.get("bloodLance");
+  const nightShield = this.abilities.get("nightShield");
 
-    // Make sure player level exists and is not undefined
-    const playerLevel = this.player?.level ?? 0;
+  // Get player level, making sure to use the correct property
+  const playerLevel = this.player.level;
+  
+  // Debug for visibility
+  console.debug(`Checking unlockable abilities. Player level: ${playerLevel}`);
 
-    // Blood Lance unlocks at level 3
-    if (
-      playerLevel >= CONFIG.ABILITIES.BLOOD_LANCE.UNLOCK_LEVEL &&
-      bloodLance &&
-      !bloodLance.unlocked
-    ) {
-      const lockedElement = document.getElementById("blood-lance-locked");
-      if (lockedElement) {
-        lockedElement.style.display = "none";
-      }
+  // Blood Lance unlocks at level 3
+  if (
+    playerLevel >= CONFIG.ABILITIES.BLOOD_LANCE.UNLOCK_LEVEL &&
+    bloodLance &&
+    !bloodLance.unlocked
+  ) {
+    const lockedElement = document.getElementById("blood-lance-locked");
+    if (lockedElement) {
+      lockedElement.style.display = "none";
     }
-
-    // Night Shield unlocks at level 5
-    if (
-      playerLevel >= CONFIG.ABILITIES.NIGHT_SHIELD.UNLOCK_LEVEL &&
-      nightShield &&
-      !nightShield.unlocked
-    ) {
-      const lockedElement = document.getElementById("night-shield-locked");
-      if (lockedElement) {
-        lockedElement.style.display = "none";
-      }
-    }
+    console.debug('Blood Lance can be unlocked now');
   }
+
+  // Night Shield unlocks at level 5
+  if (
+    playerLevel >= CONFIG.ABILITIES.NIGHT_SHIELD.UNLOCK_LEVEL &&
+    nightShield &&
+    !nightShield.unlocked
+  ) {
+    const lockedElement = document.getElementById("night-shield-locked");
+    if (lockedElement) {
+      lockedElement.style.display = "none";
+    }
+    console.debug('Night Shield can be unlocked now');
+  }
+}
 
 /**
    * Unlock an ability

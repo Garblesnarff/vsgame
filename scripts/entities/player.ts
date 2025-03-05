@@ -2,6 +2,7 @@ import CONFIG from "../config";
 import { AbilityManager } from "../abilities/ability-manager";
 import { GameEvents, EVENTS } from "../utils/event-system";
 import { Game } from "../game/game";
+import { LevelSystem } from "../game/level-system";
 
 /**
  * Interface for auto attack configuration
@@ -39,13 +40,9 @@ interface ProjectileOptions {
  * Player class representing the main character in the game
  */
 export class Player {
-  kills(_kills: any, _timeString: string) {
-    throw new Error("Method not implemented.");
-  }
-  level: number | undefined;
-  addKill() {
-    throw new Error("Method not implemented.");
-  }
+  level: number;
+  kills: number;
+  
   // Container and game references
   gameContainer: HTMLElement;
   game: Game | null;
@@ -111,7 +108,8 @@ export class Player {
     this.energyRegen = CONFIG.PLAYER.ENERGY_REGEN;
 
     // Progression
-
+    this.level = 1;
+    this.kills = 0;
     this.skillPoints = 0;
 
     // States
@@ -331,6 +329,41 @@ export class Player {
   }
 
   /**
+   * Add a kill to the player's count
+   * @returns Whether the player leveled up
+   */
+  addKill(): boolean {
+    // If the player has a level system, use that
+    if (this.levelSystem && typeof this.levelSystem.addKill === 'function') {
+      return this.levelSystem.addKill();
+    }
+    
+    // Otherwise, just count kills directly
+    if (!this.kills) {
+      this.kills = 0;
+    }
+    this.kills++;
+    
+    return false; // No level-up without a level system
+  }
+
+  /**
+ * Set the level system reference and ensure level property is kept in sync
+ * @param levelSystem - The level system instance
+ */
+setLevelSystem(levelSystem: LevelSystem): void {
+  this.levelSystem = levelSystem;
+  
+  // Initialize with current level from the level system
+  this.level = levelSystem.getLevel();
+  
+  // Listen for level changes
+  levelSystem.onLevelUp((newLevel: number) => {
+    this.level = newLevel;
+  });
+}
+
+  /**
    * Clean up player resources
    */
   destroy(): void {
@@ -339,5 +372,3 @@ export class Player {
     }
   }
 }
-
-export default Player;

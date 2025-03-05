@@ -6,7 +6,7 @@ import { LevelSystem } from "../game/level-system";
  */
 interface ExtendedPlayer extends Omit<Player, 'levelSystem'> {
   levelSystem?: any;
-  setLevelSystem?(levelSystem: LevelSystem): void;
+  setLevelSystem: (levelSystem: LevelSystem) => void; // Make this required, not optional
 }
 
 /**
