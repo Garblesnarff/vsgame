@@ -2,6 +2,7 @@ import { Ability } from "./ability-base";
 import { Particle } from "../entities/particle";
 import { Player } from "../entities/player";
 import { Enemy } from "../entities/enemy";
+import GameEvents, { EVENTS } from "../utils/event-system";
 
 /**
  * Blood Drain ability - Drains health from nearby enemies
@@ -224,7 +225,22 @@ export class BloodDrain extends Ability {
             enemy.element.parentNode.removeChild(enemy.element);
           }
           enemies.splice(i, 1);
-          this.player.addKill();
+
+          // FIXED: Update kill counter correctly
+          // Check if player has a level system that we can access
+          if (this.player.levelSystem && 
+              typeof (this.player.levelSystem as any).addKill === 'function') {
+            // Update the level system's kill counter, which will also update the player's kill count
+            (this.player.levelSystem as any).addKill();
+          } else {
+            // Fallback to player's addKill if level system isn't available
+            this.player.addKill();
+          }
+          
+          // Emit enemy death event to ensure other systems update properly
+          if (this.player.game) {
+            GameEvents.emit(EVENTS.ENEMY_DEATH, enemy);
+          }
         } else {
           // Create blood particles flowing from enemy to player (occasionally)
           // Reduced probability from 0.2 to 0.05 to limit particles

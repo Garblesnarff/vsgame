@@ -1,10 +1,12 @@
 import { Player } from "../entities/player";
+import { LevelSystem } from "../game/level-system";
 
 /**
  * Type augmentation for Player to make TypeScript happy
  */
-interface ExtendedPlayer extends Player {
+interface ExtendedPlayer extends Omit<Player, 'levelSystem'> {
   levelSystem?: any;
+  setLevelSystem?(levelSystem: LevelSystem): void;
 }
 
 /**
@@ -109,18 +111,28 @@ export class StatsDisplay {
 
     // Update level and kills
     if (this.levelElement) {
-      this.levelElement.textContent = this.player.level.toString();
+      let level = 1;
+      //check if levelSystem exists
+      if (this.player.levelSystem)
+      {
+        level = this.player.levelSystem.getLevel();
+      }
+      this.levelElement.textContent = level.toString();
     }
 
     if (this.killsElement) {
-      let kills = this.player.kills;
-      let killsToNextLevel = this.player.killsToNextLevel;
-      
-      // If the player has a level system, use its values
-      if (this.player.levelSystem) {
-        kills = (this.player.levelSystem as any).getKills();
-        killsToNextLevel = (this.player.levelSystem as any).getKillsToNextLevel();
+      let kills = 0;
+      let killsToNextLevel = 10;
+
+      //check if levelSystem exists
+      if (this.player.levelSystem)
+      {
+        kills = this.player.levelSystem.getKills();
+        killsToNextLevel = this.player.levelSystem.getKillsToNextLevel();
       }
+      
+      
+      
       
       this.killsElement.textContent = kills + " / " + killsToNextLevel;
     }

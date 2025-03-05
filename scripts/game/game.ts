@@ -125,7 +125,8 @@ export class Game {
     this.player.abilityManager.update(deltaTime, this.enemies);
 
     // Spawn enemies
-    const newEnemy = this.spawnSystem.update(this.gameTime, this.player.level);
+    const playerLevel = this.player?.level ?? 1; // Handle potentially undefined level
+    const newEnemy = this.spawnSystem.update(this.gameTime, playerLevel);
     if (newEnemy) {
       this.enemies.push(newEnemy);
 
@@ -156,14 +157,14 @@ export class Game {
    * Update auto-attack logic
    */
   updateAutoAttack(): void {
-    if (!this.player.autoAttack.enabled) {
+    if (!this.player.autoAttack?.enabled) {
       return;
     }
 
     const now = Date.now();
     if (
-      now - this.player.autoAttack.lastFired <
-      this.player.autoAttack.cooldown
+      now - (this.player.autoAttack?.lastFired ?? 0) <
+      (this.player.autoAttack?.cooldown ?? Infinity)
     ) {
       return;
     }
@@ -180,7 +181,7 @@ export class Game {
       const distance = Math.sqrt(dx * dx + dy * dy);
 
       if (
-        distance < this.player.autoAttack.range &&
+        distance < (this.player.autoAttack?.range ?? 0) &&
         distance < closestDistance
       ) {
         closestEnemy = enemy;
@@ -358,9 +359,10 @@ export class Game {
     this.uiManager.showLevelUp();
 
     // Update spawn rate
+    const playerLevel = this.player?.level ?? 1; // Handle potentially undefined level
     this.spawnSystem.currentSpawnRate = Math.max(
       500,
-      CONFIG.SPAWN_RATE - this.player.level * 200
+      CONFIG.SPAWN_RATE - playerLevel * 200
     );
 
     // Check for unlockable abilities
@@ -383,77 +385,77 @@ export class Game {
     GameEvents.emit(EVENTS.GAME_OVER, this);
   }
 
-/**
- * Restart the game
- */
-restart(): void {
-  // Deactivate all abilities before cleanup
-  if (this.player && this.player.abilityManager) {
-    const abilities = this.player.abilityManager.abilities;
-    for (const ability of abilities.values()) {
-      if (ability.isActive()) {
-        if (typeof ability.deactivate === 'function') {
-          ability.deactivate();
-        } else {
-          ability.active = false;
+  /**
+   * Restart the game
+   */
+  restart(): void {
+    // Deactivate all abilities before cleanup
+    if (this.player && this.player.abilityManager) {
+      const abilities = this.player.abilityManager.abilities;
+      for (const ability of abilities.values()) {
+        if (ability.isActive()) {
+          if (typeof ability.deactivate === 'function') {
+            ability.deactivate();
+          } else {
+            ability.active = false;
+          }
         }
       }
     }
-  }
 
-  // Clean up existing entities
-  this.cleanupEntities();
+    // Clean up existing entities
+    this.cleanupEntities();
 
-  // Reset player
-  if (this.player) {
-    this.player.destroy();
-  }
-  this.player = new Player(this.gameContainer, this);
-
-  // Reset level system
-  this.levelSystem = new LevelSystem(this.player);
-  
-  // Register level up handler for the new level system
-  this.levelSystem.onLevelUp((_level) => {
-    this.player.skillPoints++;
-    this.handleLevelUp();
-  });
-
-  // Initialize player abilities
-  this.player.abilityManager.initializeUI();
-
-  // Reset game systems
-  this.gameTime = 0;
-  this.spawnSystem.reset();
-  this.particleSystem.reset();
-
-  // Update UI manager with new player reference
-  if (this.uiManager) {
-    this.uiManager.player = this.player;
-    
-    // Update stats display with new player reference
-    if (this.uiManager.statsDisplay) {
-      this.uiManager.statsDisplay.player = this.player;
+    // Reset player
+    if (this.player) {
+      this.player.destroy();
     }
+    this.player = new Player(this.gameContainer, this);
+
+    // Reset level system
+    this.levelSystem = new LevelSystem(this.player);
     
-    // Update ability bar with new ability manager
-    if (this.uiManager.abilityBar) {
-      this.uiManager.abilityBar.abilityManager = this.player.abilityManager;
+    // Register level up handler for the new level system
+    this.levelSystem.onLevelUp((_level) => {
+      this.player.skillPoints++;
+      this.handleLevelUp();
+    });
+
+    // Initialize player abilities
+    this.player.abilityManager.initializeUI();
+
+    // Reset game systems
+    this.gameTime = 0;
+    this.spawnSystem.reset();
+    this.particleSystem.reset();
+
+    // Update UI manager with new player reference
+    if (this.uiManager) {
+      this.uiManager.player = this.player;
+      
+      // Update stats display with new player reference
+      if (this.uiManager.statsDisplay) {
+        this.uiManager.statsDisplay.player = this.player;
+      }
+      
+      // Update ability bar with new ability manager
+      if (this.uiManager.abilityBar) {
+        this.uiManager.abilityBar.abilityManager = this.player.abilityManager;
+      }
     }
+
+    // Reset UI
+    this.uiManager.reset();
+
+    // Force an immediate UI update
+    this.uiManager.update();
+
+    // Start game loop
+    this.gameLoop.start(this.update.bind(this));
+
+    // Emit game restart event
+    GameEvents.emit(EVENTS.GAME_RESTART, this);
   }
-
-  // Reset UI
-  this.uiManager.reset();
-
-  // Force an immediate UI update
-  this.uiManager.update();
-
-  // Start game loop
-  this.gameLoop.start(this.update.bind(this));
-
-  // Emit game restart event
-  GameEvents.emit(EVENTS.GAME_RESTART, this);
-}
 
   /**
    * Clean up all game entities
@@ -544,81 +546,84 @@ restart(): void {
     }
   }
 
-/**
+  /**
    * Upgrade a skill
    * @param skillId - ID of the skill to upgrade
    */
-upgradeSkill(skillId: string): void {
-  // Check if player has skill points
-  if (this.player.skillPoints <= 0) {
-    return;
-  }
-
-  let pointCost = CONFIG.UI.SKILL_MENU.UPGRADE_COST;
-  let upgraded = false;
-
-  // Handle different skills
-  if (skillId === "autoAttack") {
-    // Auto attack upgrade
-    if (this.player.autoAttack.level < this.player.autoAttack.maxLevel) {
-      this.player.autoAttack.level++;
-      this.player.autoAttack.damage += 10; // +10 damage per level
-      this.player.autoAttack.cooldown = Math.max(
-        300,
-        this.player.autoAttack.cooldown - 100
-      ); // -100ms cooldown (min 300ms)
-      this.player.autoAttack.range += 30; // +30 range per level
-      upgraded = true;
+  upgradeSkill(skillId: string): void {
+    // Check if player has skill points
+    if ((this.player.skillPoints ?? 0) <= 0) {
+      return;
     }
-  } else if (skillId === "bloodLance") {
-    // Blood Lance unlock/upgrade
-    const bloodLance = this.player.abilityManager.getAbility("bloodLance");
 
-    if (
-      bloodLance &&
-      !bloodLance.unlocked &&
-      this.player.level >= CONFIG.ABILITIES.BLOOD_LANCE.UNLOCK_LEVEL
-    ) {
-      // Unlock ability
-      pointCost = CONFIG.UI.SKILL_MENU.BLOOD_LANCE_UNLOCK_COST;
-      upgraded = this.player.abilityManager.unlockAbility("bloodLance");
-      
-      // No UI initialization here - handled by AbilityManager
-    } else if (bloodLance && bloodLance.unlocked) {
-      // Upgrade ability
-      upgraded = this.player.abilityManager.upgradeAbility("bloodLance");
+    let pointCost = CONFIG.UI.SKILL_MENU.UPGRADE_COST;
+    let upgraded = false;
+
+    // Handle different skills
+    if (skillId === "autoAttack") {
+      // Auto attack upgrade
+      const autoAttack = this.player.autoAttack;
+      if (autoAttack && autoAttack.level < autoAttack.maxLevel) {
+        autoAttack.level++;
+        autoAttack.damage += 10; // +10 damage per level
+        autoAttack.cooldown = Math.max(
+          300,
+          autoAttack.cooldown - 100
+        ); // -100ms cooldown (min 300ms)
+        autoAttack.range += 30; // +30 range per level
+        upgraded = true;
+      }
+    } else if (skillId === "bloodLance") {
+      // Blood Lance unlock/upgrade
+      const bloodLance = this.player.abilityManager.getAbility("bloodLance");
+      const playerLevel = this.player?.level ?? 0;
+
+      if (
+        bloodLance &&
+        !bloodLance.unlocked &&
+        playerLevel >= CONFIG.ABILITIES.BLOOD_LANCE.UNLOCK_LEVEL
+      ) {
+        // Unlock ability
+        pointCost = CONFIG.UI.SKILL_MENU.BLOOD_LANCE_UNLOCK_COST;
+        upgraded = this.player.abilityManager.unlockAbility("bloodLance");
+        
+        // No UI initialization here - handled by AbilityManager
+      } else if (bloodLance && bloodLance.unlocked) {
+        // Upgrade ability
+        upgraded = this.player.abilityManager.upgradeAbility("bloodLance");
+      }
+    } else if (skillId === "nightShield") {
+      // Night Shield unlock/upgrade
+      const nightShield = this.player.abilityManager.getAbility("nightShield");
+      const playerLevel = this.player?.level ?? 0;
+
+      if (
+        nightShield &&
+        !nightShield.unlocked &&
+        playerLevel >= CONFIG.ABILITIES.NIGHT_SHIELD.UNLOCK_LEVEL
+      ) {
+        // Unlock ability
+        pointCost = CONFIG.UI.SKILL_MENU.NIGHT_SHIELD_UNLOCK_COST;
+        upgraded = this.player.abilityManager.unlockAbility("nightShield");
+        
+        // No UI initialization here - handled by AbilityManager
+      } else if (nightShield && nightShield.unlocked) {
+        // Upgrade ability
+        upgraded = this.player.abilityManager.upgradeAbility("nightShield");
+      }
+    } else {
+      // Regular ability upgrade
+      upgraded = this.player.abilityManager.upgradeAbility(skillId);
     }
-  } else if (skillId === "nightShield") {
-    // Night Shield unlock/upgrade
-    const nightShield = this.player.abilityManager.getAbility("nightShield");
 
-    if (
-      nightShield &&
-      !nightShield.unlocked &&
-      this.player.level >= CONFIG.ABILITIES.NIGHT_SHIELD.UNLOCK_LEVEL
-    ) {
-      // Unlock ability
-      pointCost = CONFIG.UI.SKILL_MENU.NIGHT_SHIELD_UNLOCK_COST;
-      upgraded = this.player.abilityManager.unlockAbility("nightShield");
-      
-      // No UI initialization here - handled by AbilityManager
-    } else if (nightShield && nightShield.unlocked) {
-      // Upgrade ability
-      upgraded = this.player.abilityManager.upgradeAbility("nightShield");
+    // Deduct skill points if upgrade was successful
+    if (upgraded) {
+      this.player.skillPoints -= pointCost;
+
+      // Emit ability upgraded event
+      GameEvents.emit(EVENTS.ABILITY_UPGRADE, skillId, this.player);
     }
-  } else {
-    // Regular ability upgrade
-    upgraded = this.player.abilityManager.upgradeAbility(skillId);
   }
-
-  // Deduct skill points if upgrade was successful
-  if (upgraded) {
-    this.player.skillPoints -= pointCost;
-
-    // Emit ability upgraded event
-    GameEvents.emit(EVENTS.ABILITY_UPGRADE, skillId, this.player);
-  }
-}
 
   /**
    * Check if the game is currently running

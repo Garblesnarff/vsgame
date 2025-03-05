@@ -39,6 +39,13 @@ interface ProjectileOptions {
  * Player class representing the main character in the game
  */
 export class Player {
+  kills(_kills: any, _timeString: string) {
+    throw new Error("Method not implemented.");
+  }
+  level: number | undefined;
+  addKill() {
+    throw new Error("Method not implemented.");
+  }
   // Container and game references
   gameContainer: HTMLElement;
   game: Game | null;
@@ -58,9 +65,6 @@ export class Player {
   energyRegen: number;
 
   // Progression
-  level: number;
-  kills: number;
-  killsToNextLevel: number;
   skillPoints: number;
 
   // States
@@ -81,6 +85,7 @@ export class Player {
 
   // DOM element
   element: HTMLElement | null;
+  levelSystem: any;
 
   /**
    * Create a new player
@@ -106,9 +111,7 @@ export class Player {
     this.energyRegen = CONFIG.PLAYER.ENERGY_REGEN;
 
     // Progression
-    this.level = 1;
-    this.kills = 0;
-    this.killsToNextLevel = CONFIG.LEVEL.KILLS_FOR_LEVELS[1];
+
     this.skillPoints = 0;
 
     // States
@@ -313,52 +316,6 @@ export class Player {
 
     this.autoAttack.lastFired = now;
     return true;
-  }
-
-  /**
-   * Add a kill to the player's count and check for level up
-   * @returns Whether the player leveled up
-   */
-  addKill(): boolean {
-    this.kills++;
-
-    if (
-      this.level < CONFIG.LEVEL.KILLS_FOR_LEVELS.length - 1 &&
-      this.kills >= CONFIG.LEVEL.KILLS_FOR_LEVELS[this.level]
-    ) {
-      this.levelUp();
-      return true;
-    }
-
-    return false;
-  }
-
-  /**
-   * Level up the player
-   */
-  levelUp(): void {
-    this.level++;
-    this.skillPoints++;
-
-    // Update next level threshold
-    if (this.level < CONFIG.LEVEL.KILLS_FOR_LEVELS.length - 1) {
-      this.killsToNextLevel = CONFIG.LEVEL.KILLS_FOR_LEVELS[this.level];
-    } else {
-      this.killsToNextLevel = this.kills + 20;
-    }
-
-    // Heal player
-    this.health = Math.min(this.maxHealth, this.health + 20);
-
-    // Increase auto attack base damage with level
-    this.autoAttack.damage =
-      CONFIG.ABILITIES.AUTO_ATTACK.DAMAGE + this.level * 2;
-
-    // Emit level up event
-    GameEvents.emit(EVENTS.PLAYER_LEVEL_UP, this.level, this);
-
-    // Emit skill point gained event
-    GameEvents.emit(EVENTS.PLAYER_SKILL_POINT, this.skillPoints, this);
   }
 
   /**

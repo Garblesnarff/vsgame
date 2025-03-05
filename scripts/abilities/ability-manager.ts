@@ -109,9 +109,12 @@ update(deltaTime: number, enemies: Enemy[] = []): void {
     const bloodLance = this.abilities.get("bloodLance");
     const nightShield = this.abilities.get("nightShield");
 
+    // Make sure player level exists and is not undefined
+    const playerLevel = this.player?.level ?? 0;
+
     // Blood Lance unlocks at level 3
     if (
-      this.player.level >= CONFIG.ABILITIES.BLOOD_LANCE.UNLOCK_LEVEL &&
+      playerLevel >= CONFIG.ABILITIES.BLOOD_LANCE.UNLOCK_LEVEL &&
       bloodLance &&
       !bloodLance.unlocked
     ) {
@@ -123,7 +126,7 @@ update(deltaTime: number, enemies: Enemy[] = []): void {
 
     // Night Shield unlocks at level 5
     if (
-      this.player.level >= CONFIG.ABILITIES.NIGHT_SHIELD.UNLOCK_LEVEL &&
+      playerLevel >= CONFIG.ABILITIES.NIGHT_SHIELD.UNLOCK_LEVEL &&
       nightShield &&
       !nightShield.unlocked
     ) {

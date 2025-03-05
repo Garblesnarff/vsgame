@@ -132,7 +132,9 @@ export class UIManager {
    */
   showGameOver(): void {
     const timeString = this.statsDisplay.formatTime(this.game.gameTime);
-    this.screensManager.showGameOver(this.player.kills, timeString);
+    // Cast kills to number to ensure type safety
+    const killCount = Number(this.player.kills);
+    this.screensManager.showGameOver(killCount, timeString);
   }
 
   /**
