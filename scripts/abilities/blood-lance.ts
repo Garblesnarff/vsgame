@@ -200,12 +200,8 @@ export class BloodLance extends Ability {
    */
   unlock(): boolean {
     const result = super.unlock();
-
-    // Initialize UI once unlocked
-    if (result && !this.element) {
-      this.initializeUI("abilities", "blood-lance", "🗡️");
-    }
-
+  
+    
     return result;
   }
 }

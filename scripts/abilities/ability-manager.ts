@@ -134,29 +134,29 @@ update(deltaTime: number, enemies: Enemy[] = []): void {
     }
   }
 
-  /**
+/**
    * Unlock an ability
    * @param abilityName - Name of the ability to unlock
    * @returns Whether the unlock was successful
    */
-  unlockAbility(abilityName: string): boolean {
-    const ability = this.abilities.get(abilityName);
-    if (!ability || ability.unlocked) {
-      return false;
-    }
-
-    // Unlock the ability
-    ability.unlock();
-
-    // Initialize UI for newly unlocked ability
-    if (abilityName === "bloodLance") {
-      ability.initializeUI("abilities", "blood-lance", "🗡️");
-    } else if (abilityName === "nightShield") {
-      ability.initializeUI("abilities", "night-shield", "🛡️");
-    }
-
-    return true;
+unlockAbility(abilityName: string): boolean {
+  const ability = this.abilities.get(abilityName);
+  if (!ability || ability.unlocked) {
+    return false;
   }
+
+  // Unlock the ability
+  ability.unlock();
+
+  // Initialize UI for newly unlocked ability
+  if (abilityName === "bloodLance") {
+    ability.initializeUI("abilities", "blood-lance", "🗡️");
+  } else if (abilityName === "nightShield") {
+    ability.initializeUI("abilities", "night-shield", "🛡️");
+  }
+
+  return true;
+}
 
   /**
    * Upgrade an ability

@@ -143,8 +143,28 @@ export class BatSwarm extends Ability {
               );
             }
 
-            // Damage enemy
-            enemy.takeDamage(this.getScaledDamage());
+            // Apply direct damage to the enemy, matching original implementation
+            // Original code used: enemy.health -= player.abilities.batSwarm.damage;
+            enemy.health -= this.damage;
+              
+            // Update the enemy health bar
+            enemy.updateHealthBar();
+              
+            // Check if enemy died
+            if (enemy.health <= 0) {
+              if (enemy.destroy) {
+                enemy.destroy();
+              } else if (enemy.element && enemy.element.parentNode) {
+                enemy.element.parentNode.removeChild(enemy.element);
+              }
+                
+              enemies.splice(j, 1);
+                
+              // Add kill to player
+              if (this.player.addKill) {
+                this.player.addKill();
+              }
+            }
 
             // Remove bat
             this.removeBat(i);
@@ -211,10 +231,12 @@ export class BatSwarm extends Ability {
 
   /**
    * Get damage scaled by ability level
-   * @returns Scaled damage
+   * @returns Scaled damage for display purposes
    */
   getScaledDamage(): number {
-    return this.damage + (this.level) * 50;
+    // For UI display purposes only
+    // This doesn't affect the actual damage calculation in update()
+    return this.damage;
   }
 
   /**

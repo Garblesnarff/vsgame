@@ -544,87 +544,81 @@ restart(): void {
     }
   }
 
-  /**
+/**
    * Upgrade a skill
    * @param skillId - ID of the skill to upgrade
    */
-  upgradeSkill(skillId: string): void {
-    // Check if player has skill points
-    if (this.player.skillPoints <= 0) {
-      return;
-    }
-
-    let pointCost = CONFIG.UI.SKILL_MENU.UPGRADE_COST;
-    let upgraded = false;
-
-    // Handle different skills
-    if (skillId === "autoAttack") {
-      // Auto attack upgrade
-      if (this.player.autoAttack.level < this.player.autoAttack.maxLevel) {
-        this.player.autoAttack.level++;
-        this.player.autoAttack.damage += 10; // +10 damage per level
-        this.player.autoAttack.cooldown = Math.max(
-          300,
-          this.player.autoAttack.cooldown - 100
-        ); // -100ms cooldown (min 300ms)
-        this.player.autoAttack.range += 30; // +30 range per level
-        upgraded = true;
-      }
-    } else if (skillId === "bloodLance") {
-      // Blood Lance unlock/upgrade
-      const bloodLance = this.player.abilityManager.getAbility("bloodLance");
-
-      if (
-        bloodLance &&
-        !bloodLance.unlocked &&
-        this.player.level >= CONFIG.ABILITIES.BLOOD_LANCE.UNLOCK_LEVEL
-      ) {
-        // Unlock ability
-        pointCost = CONFIG.UI.SKILL_MENU.BLOOD_LANCE_UNLOCK_COST;
-        upgraded = this.player.abilityManager.unlockAbility("bloodLance");
-
-        // Add to UI when unlocked
-        if (upgraded) {
-          this.uiManager.addUnlockedAbility("bloodLance", "🗡️", "4");
-        }
-      } else if (bloodLance && bloodLance.unlocked) {
-        // Upgrade ability
-        upgraded = this.player.abilityManager.upgradeAbility("bloodLance");
-      }
-    } else if (skillId === "nightShield") {
-      // Night Shield unlock/upgrade
-      const nightShield = this.player.abilityManager.getAbility("nightShield");
-
-      if (
-        nightShield &&
-        !nightShield.unlocked &&
-        this.player.level >= CONFIG.ABILITIES.NIGHT_SHIELD.UNLOCK_LEVEL
-      ) {
-        // Unlock ability
-        pointCost = CONFIG.UI.SKILL_MENU.NIGHT_SHIELD_UNLOCK_COST;
-        upgraded = this.player.abilityManager.unlockAbility("nightShield");
-
-        // Add to UI when unlocked
-        if (upgraded) {
-          this.uiManager.addUnlockedAbility("nightShield", "🛡️", "5");
-        }
-      } else if (nightShield && nightShield.unlocked) {
-        // Upgrade ability
-        upgraded = this.player.abilityManager.upgradeAbility("nightShield");
-      }
-    } else {
-      // Regular ability upgrade
-      upgraded = this.player.abilityManager.upgradeAbility(skillId);
-    }
-
-    // Deduct skill points if upgrade was successful
-    if (upgraded) {
-      this.player.skillPoints -= pointCost;
-
-      // Emit ability upgraded event
-      GameEvents.emit(EVENTS.ABILITY_UPGRADE, skillId, this.player);
-    }
+upgradeSkill(skillId: string): void {
+  // Check if player has skill points
+  if (this.player.skillPoints <= 0) {
+    return;
   }
+
+  let pointCost = CONFIG.UI.SKILL_MENU.UPGRADE_COST;
+  let upgraded = false;
+
+  // Handle different skills
+  if (skillId === "autoAttack") {
+    // Auto attack upgrade
+    if (this.player.autoAttack.level < this.player.autoAttack.maxLevel) {
+      this.player.autoAttack.level++;
+      this.player.autoAttack.damage += 10; // +10 damage per level
+      this.player.autoAttack.cooldown = Math.max(
+        300,
+        this.player.autoAttack.cooldown - 100
+      ); // -100ms cooldown (min 300ms)
+      this.player.autoAttack.range += 30; // +30 range per level
+      upgraded = true;
+    }
+  } else if (skillId === "bloodLance") {
+    // Blood Lance unlock/upgrade
+    const bloodLance = this.player.abilityManager.getAbility("bloodLance");
+
+    if (
+      bloodLance &&
+      !bloodLance.unlocked &&
+      this.player.level >= CONFIG.ABILITIES.BLOOD_LANCE.UNLOCK_LEVEL
+    ) {
+      // Unlock ability
+      pointCost = CONFIG.UI.SKILL_MENU.BLOOD_LANCE_UNLOCK_COST;
+      upgraded = this.player.abilityManager.unlockAbility("bloodLance");
+      
+      // No UI initialization here - handled by AbilityManager
+    } else if (bloodLance && bloodLance.unlocked) {
+      // Upgrade ability
+      upgraded = this.player.abilityManager.upgradeAbility("bloodLance");
+    }
+  } else if (skillId === "nightShield") {
+    // Night Shield unlock/upgrade
+    const nightShield = this.player.abilityManager.getAbility("nightShield");
+
+    if (
+      nightShield &&
+      !nightShield.unlocked &&
+      this.player.level >= CONFIG.ABILITIES.NIGHT_SHIELD.UNLOCK_LEVEL
+    ) {
+      // Unlock ability
+      pointCost = CONFIG.UI.SKILL_MENU.NIGHT_SHIELD_UNLOCK_COST;
+      upgraded = this.player.abilityManager.unlockAbility("nightShield");
+      
+      // No UI initialization here - handled by AbilityManager
+    } else if (nightShield && nightShield.unlocked) {
+      // Upgrade ability
+      upgraded = this.player.abilityManager.upgradeAbility("nightShield");
+    }
+  } else {
+    // Regular ability upgrade
+    upgraded = this.player.abilityManager.upgradeAbility(skillId);
+  }
+
+  // Deduct skill points if upgrade was successful
+  if (upgraded) {
+    this.player.skillPoints -= pointCost;
+
+    // Emit ability upgraded event
+    GameEvents.emit(EVENTS.ABILITY_UPGRADE, skillId, this.player);
+  }
+}
 
   /**
    * Check if the game is currently running
