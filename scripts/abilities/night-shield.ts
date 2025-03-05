@@ -362,12 +362,10 @@ export class NightShield extends Ability {
    */
   unlock(): boolean {
     const result = super.unlock();
-
-    // Initialize UI once unlocked
-    if (result && !this.element) {
-      this.initializeUI("abilities", "night-shield", "🛡️");
-    }
-
+    
+    // Removed UI initialization to fix duplicate buttons issue
+    // The UI will now be initialized by AbilityManager only
+    
     return result;
   }
 }
