@@ -18,13 +18,83 @@ interface PlayerConfig {
 }
 
 /**
- * Enemy configuration interface
+ * Base enemy configuration interface
  */
-interface EnemyConfig {
+interface BaseEnemyConfig {
   WIDTH: number;
   HEIGHT: number;
   BASE_HEALTH: number;
   BASE_DAMAGE: number;
+}
+
+/**
+ * Vampire Hunter configuration
+ */
+interface VampireHunterConfig {
+  WIDTH: number;
+  HEIGHT: number;
+  BASE_HEALTH: number;
+  BASE_DAMAGE: number;
+  PROJECTILE_COOLDOWN: number;
+  PROJECTILE_SPEED: number;
+  PROJECTILE_DAMAGE_MULTIPLIER: number;
+  DETECTION_RADIUS: number;
+  PREFERRED_DISTANCE: number;
+}
+
+/**
+ * Fast Swarmer configuration
+ */
+interface FastSwarmerConfig {
+  WIDTH: number;
+  HEIGHT: number;
+  BASE_HEALTH: number;
+  BASE_DAMAGE: number;
+  SIZE_MULTIPLIER: number;
+  SPEED_MULTIPLIER: number;
+  HEALTH_MULTIPLIER: number;
+  DAMAGE_MULTIPLIER: number;
+  DODGE_CHANCE: number;
+  BURST_SPEED_MULTIPLIER: number;
+}
+
+/**
+ * Tanky Brute configuration
+ */
+interface TankyBruteConfig {
+  WIDTH: number;
+  HEIGHT: number;
+  BASE_HEALTH: number;
+  BASE_DAMAGE: number;
+  SIZE_MULTIPLIER: number;
+  HEALTH_MULTIPLIER: number;
+  DAMAGE_MULTIPLIER: number;
+  SPEED_MULTIPLIER: number;
+  DAMAGE_REDUCTION: number;
+  SLAM_ATTACK_COOLDOWN: number;
+  SLAM_ATTACK_RADIUS: number;
+  SLAM_ATTACK_DAMAGE_MULTIPLIER: number;
+  BLOOD_LANCE_VULNERABILITY_MULTIPLIER: number;
+}
+
+/**
+ * Spawn rates configuration
+ */
+interface SpawnRatesConfig {
+  HUNTER_SPAWN_RATE: number;
+  SWARM_SPAWN_RATE: number;
+  BASE_SWARM_SIZE: number;
+}
+
+/**
+ * Enemy configuration interface
+ */
+interface EnemyConfig {
+  BASE: BaseEnemyConfig;
+  VAMPIRE_HUNTER: VampireHunterConfig;
+  FAST_SWARMER: FastSwarmerConfig;
+  TANKY_BRUTE: TankyBruteConfig;
+  SPAWN_RATES: SpawnRatesConfig;
 }
 
 /**
@@ -180,10 +250,60 @@ export const CONFIG: GameConfig = {
 
   // Enemy settings
   ENEMY: {
-    WIDTH: 25,
-    HEIGHT: 25,
-    BASE_HEALTH: 50,
-    BASE_DAMAGE: 5,
+    // Base enemy settings
+    BASE: {
+      WIDTH: 25,
+      HEIGHT: 25,
+      BASE_HEALTH: 50,
+      BASE_DAMAGE: 5,
+    },
+    // Vampire Hunter settings
+    VAMPIRE_HUNTER: {
+      WIDTH: 25, // Using base values
+      HEIGHT: 25,
+      BASE_HEALTH: 50,
+      BASE_DAMAGE: 5,
+      PROJECTILE_COOLDOWN: 2000, // 2 seconds between shots
+      PROJECTILE_SPEED: 6,
+      PROJECTILE_DAMAGE_MULTIPLIER: 1.5, // Projectiles do more damage than base
+      DETECTION_RADIUS: 350, // Detection range
+      PREFERRED_DISTANCE: 250, // Tries to maintain this distance from player
+    },
+    // Fast Swarmer settings
+    FAST_SWARMER: {
+      WIDTH: 25, // Base values before applying multiplier
+      HEIGHT: 25,
+      BASE_HEALTH: 50,
+      BASE_DAMAGE: 5,
+      SIZE_MULTIPLIER: 0.7, // Smaller than base enemies
+      SPEED_MULTIPLIER: 2.2, // Much faster than base enemies
+      HEALTH_MULTIPLIER: 0.4, // Less health than base enemies
+      DAMAGE_MULTIPLIER: 0.6, // Less damage than base enemies
+      DODGE_CHANCE: 0.15, // 15% base chance to dodge
+      BURST_SPEED_MULTIPLIER: 2.5, // Speed burst multiplier
+    },
+    // Tanky Brute settings
+    TANKY_BRUTE: {
+      WIDTH: 25, // Base values before applying multiplier
+      HEIGHT: 25,
+      BASE_HEALTH: 50,
+      BASE_DAMAGE: 5,
+      SIZE_MULTIPLIER: 1.8, // Much larger than base enemies
+      HEALTH_MULTIPLIER: 4.0, // Much more health than base enemies
+      DAMAGE_MULTIPLIER: 2.0, // Much more damage than base enemies
+      SPEED_MULTIPLIER: 0.5, // Much slower than base enemies
+      DAMAGE_REDUCTION: 0.4, // Reduces damage taken by 40%
+      SLAM_ATTACK_COOLDOWN: 5000, // 5 seconds between slam attacks
+      SLAM_ATTACK_RADIUS: 120, // Area affect radius
+      SLAM_ATTACK_DAMAGE_MULTIPLIER: 1.5, // Slam attack damage multiplier
+      BLOOD_LANCE_VULNERABILITY_MULTIPLIER: 1.5, // Takes extra damage from Blood Lance
+    },
+    // Spawn rate settings
+    SPAWN_RATES: {
+      HUNTER_SPAWN_RATE: 7000, // 7 seconds between hunter spawns
+      SWARM_SPAWN_RATE: 12000, // 12 seconds between swarm spawns
+      BASE_SWARM_SIZE: 3, // Base number of enemies per swarm
+    }
   },
 
   // Leveling system

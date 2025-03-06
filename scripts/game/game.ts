@@ -1,6 +1,6 @@
 import { Player } from "../entities/player";
 import { Projectile, ProjectileOptions } from "../entities/projectile";
-import { Enemy } from "../entities/enemy";
+import { Enemy } from "../entities/enemies/base-enemy";
 import { GameLoop } from "./game-loop";
 import { InputHandler } from "./input-handler";
 import { SpawnSystem } from "./spawn-system";

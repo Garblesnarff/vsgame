@@ -140,6 +140,9 @@ export const EVENTS = {
   ENEMY_SPAWN: "enemy:spawn",
   ENEMY_DAMAGE: "enemy:damage",
   ENEMY_DEATH: "enemy:death",
+  ENEMY_ATTACK: "enemy:attack",
+  ENEMY_CHARGE: "enemy:charge",
+  SPAWN_SPECIAL: "spawn:special",
 
   // Ability events
   ABILITY_USE: "ability:use",

@@ -1,13 +1,13 @@
-import CONFIG from "../config";
-import { Player } from "./player";
+import CONFIG from "../../config";
+import { GameEvents, EVENTS } from "../../utils/event-system";
 
 /**
  * Type for particle creation callback
  */
-type ParticleCreationFunction = (x: number, y: number, count: number) => void;
+export type ParticleCreationFunction = (x: number, y: number, count: number) => void;
 
 /**
- * Enemy class representing monsters that attack the player
+ * Base Enemy class representing monsters that attack the player
  */
 export class Enemy {
   // DOM elements
@@ -40,16 +40,16 @@ export class Enemy {
     this.gameContainer = gameContainer;
 
     // Position and dimensions
-    this.width = CONFIG.ENEMY.WIDTH;
-    this.height = CONFIG.ENEMY.HEIGHT;
+    this.width = CONFIG.ENEMY.BASE.WIDTH;
+    this.height = CONFIG.ENEMY.BASE.HEIGHT;
     this.x = 0;
     this.y = 0;
 
     // Stats scaled by player level
     this.speed = 1 + Math.random() * playerLevel * 0.2;
-    this.health = CONFIG.ENEMY.BASE_HEALTH + playerLevel * 10;
+    this.health = CONFIG.ENEMY.BASE.BASE_HEALTH + playerLevel * 10;
     this.maxHealth = this.health;
-    this.damage = CONFIG.ENEMY.BASE_DAMAGE + playerLevel;
+    this.damage = CONFIG.ENEMY.BASE.BASE_DAMAGE + playerLevel;
 
     // Assign unique ID
     this.id = "enemy_" + Date.now() + "_" + Math.floor(Math.random() * 1000);
@@ -106,8 +106,9 @@ export class Enemy {
   /**
    * Updates the enemy's position to follow the player
    * @param player - Player object to follow
+   * @param _createProjectile - Optional function for enemies that can shoot
    */
-  moveTowardsPlayer(player: Player): void {
+  moveTowardsPlayer(player: any, _createProjectile?: any): void {
     const dx = player.x + player.width / 2 - (this.x + this.width / 2);
     const dy = player.y + player.height / 2 - (this.y + this.height / 2);
     const dist = Math.sqrt(dx * dx + dy * dy);
@@ -138,12 +139,15 @@ export class Enemy {
    * Enemy takes damage from a source
    * @param amount - Damage amount
    * @param createParticles - Function to create blood particles (optional)
+   * @param _projectileType - Type of projectile that caused damage (optional)
    * @returns Whether the enemy died
    */
   takeDamage(
     amount: number,
-    createParticles?: ParticleCreationFunction
+    createParticles?: ParticleCreationFunction,
+    _projectileType?: string
   ): boolean {
+    // Default implementation - subclasses can override for special damage handling
     this.health -= amount;
     this.updateHealthBar();
 
@@ -151,6 +155,9 @@ export class Enemy {
     if (createParticles) {
       createParticles(this.x + this.width / 2, this.y + this.height / 2, 5);
     }
+
+    // Emit damage event
+    GameEvents.emit(EVENTS.ENEMY_DAMAGE, this, amount);
 
     // Return whether the enemy died - use a small threshold to account for floating point errors
     return this.health <= 0.001;
@@ -161,7 +168,7 @@ export class Enemy {
    * @param player - Player object
    * @returns Whether collision occurred
    */
-  collidesWithPlayer(player: Player): boolean {
+  collidesWithPlayer(player: any): boolean {
     return (
       this.x < player.x + player.width &&
       this.x + this.width > player.x &&

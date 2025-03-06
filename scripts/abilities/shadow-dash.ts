@@ -1,6 +1,6 @@
 import { Ability } from "./ability-base";
 import { Player } from "../entities/player";
-import { Enemy } from "../entities/enemy";
+import { Enemy } from "../entities/enemies/base-enemy";
 import { Particle } from "../entities/particle";
 
 /**

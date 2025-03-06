@@ -1,6 +1,6 @@
 import { GameEvents, EVENTS } from "../utils/event-system";
 import { Player } from "../entities/player";
-import { Enemy } from "../entities/enemy";
+import { Enemy } from "../entities/enemies/base-enemy";
 
 /**
  * Configuration options for creating abilities

@@ -1,7 +1,8 @@
 import { Ability } from "./ability-base";
 import { Particle } from "../entities/particle";
 import { Player } from "../entities/player";
-import { Enemy } from "../entities/enemy";
+import { Enemy } from "../entities/enemies/base-enemy";
+
 import GameEvents, { EVENTS } from "../utils/event-system";
 
 /**
@@ -204,7 +205,7 @@ export class BloodDrain extends Ability {
 
       if (dist <= range) {
         // Enemy is in range of blood drain
-        const enemyDied = enemy.takeDamage(damage, (x, y, count) => {
+        const enemyDied = enemy.takeDamage(damage, (x: number, y: number, count: number) => {
           // Limit particle creation
           if (particlesCreated < maxParticlesPerFrame) {
             if (this.player.game && this.player.game.particleSystem) {

@@ -1,5 +1,6 @@
 import CONFIG from "../config";
-import { Enemy } from "./enemy";
+import { Enemy } from "../entities/enemies/base-enemy";
+
 
 /**
  * Interface for projectile options

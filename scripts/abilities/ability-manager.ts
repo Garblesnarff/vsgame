@@ -6,7 +6,8 @@ import { ShadowDash } from "./shadow-dash";
 import { BloodLance } from "./blood-lance";
 import { NightShield } from "./night-shield";
 import { Player } from "../entities/player";
-import { Enemy } from "../entities/enemy";
+import { Enemy } from "../entities/enemies/base-enemy";
+
 
 /**
  * Manages all player abilities
