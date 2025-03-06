@@ -11,6 +11,7 @@ import { GameStateManager, defaultStateHandlers } from "./state-manager";
 import { GameEvents, EVENTS } from "../utils/event-system";
 import CONFIG from "../config";
 import { GameState } from "../types/game-types";
+import VampireHunter from "../entities/enemies/vampire-hunter";
 
 /**
  * Main Game class that orchestrates all game systems
@@ -202,12 +203,17 @@ export class Game {
    * Update enemy movement and check for collisions
    * @param _deltaTime - Time since last update in ms
    */
-  updateEnemies(_deltaTime: number): void {
+  updateEnemies(deltaTime: number): void {
     for (let i = this.enemies.length - 1; i >= 0; i--) {
       const enemy = this.enemies[i];
-
+  
       // Move enemy towards player
-      enemy.moveTowardsPlayer(this.player);
+      // Pass the createProjectile function to vampire hunters
+      if (enemy instanceof VampireHunter) {
+        enemy.moveTowardsPlayer(this.player, this.createProjectile.bind(this));
+      } else {
+        enemy.moveTowardsPlayer(this.player);
+      }
 
       // Check for Blood Drain ability affecting this enemy
       const bloodDrain = this.player.abilityManager.getAbility("bloodDrain");

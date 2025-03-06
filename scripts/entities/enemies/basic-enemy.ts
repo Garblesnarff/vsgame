@@ -1,5 +1,4 @@
 import { Enemy } from './base-enemy';
-import CONFIG from '../../config';
 
 /**
  * BasicEnemy class - The standard enemy type

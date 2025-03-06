@@ -179,21 +179,24 @@ export class SpawnSystem {
       }
     }
     
-    // If no milestone is applicable or we've already spawned all brutes for this level
+    // If no milestone is applicable
     if (milestone === -1) {
       return false;
     }
     
+    // Get how many brutes should spawn at this level
     const brutesNeeded = this.bruteSpawnCount.get(milestone) || 0;
+    
+    // Add debugging
+    console.log(`Level ${playerLevel}, Milestone ${milestone}, Brutes needed: ${brutesNeeded}, Spawned: ${this.spawnedBrutesCount}`);
+    
+    // Spawn if we haven't reached the quota for this level
     return this.spawnedBrutesCount < brutesNeeded;
   }
   
-  /**
-   * Reset spawn system and update brute count for the new level
-   * @param playerLevel - Current player level
-   */
+  // Also make sure this method gets called after leveling up:
   updateForLevelChange(playerLevel: number): void {
-    // Reset brute counter when level changes
+    // Reset brute counter when level changes to ensure we get fresh spawns
     this.spawnedBrutesCount = 0;
     
     // Emit event about special enemies at this level

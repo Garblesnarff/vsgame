@@ -71,6 +71,7 @@ export class TankyBrute extends Enemy {
     this.vulnerableToBloodLance = true;
     this.bloodLanceVulnerabilityMultiplier = CONFIG.ENEMY.TANKY_BRUTE.BLOOD_LANCE_VULNERABILITY_MULTIPLIER;
     
+    
     // Update health bar container due to larger size
     if (this.healthBarContainer) {
       this.healthBarContainer.style.width = this.width + "px";

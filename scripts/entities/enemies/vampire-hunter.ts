@@ -48,7 +48,7 @@ export class VampireHunter extends Enemy {
     this.lastFired = 0;
     this.detectionRadius = CONFIG.ENEMY.VAMPIRE_HUNTER.DETECTION_RADIUS + playerLevel * 5;
     this.aimingTime = 700; // Time spent aiming before firing
-    this.isAiming = false;
+    this.isAiming = false; 
     this.aimStartTime = 0;
     this.preferredDistance = CONFIG.ENEMY.VAMPIRE_HUNTER.PREFERRED_DISTANCE;
     this.projectileSpeed = CONFIG.ENEMY.VAMPIRE_HUNTER.PROJECTILE_SPEED;
@@ -61,6 +61,9 @@ export class VampireHunter extends Enemy {
     
     // Add indicator for ranged enemy
     this.addRangedIndicator();
+    
+    // Set the initial aim visual state
+    this.setAimingVisual();
   }
   
   /**
@@ -74,10 +77,9 @@ export class VampireHunter extends Enemy {
   
   /**
    * Handle the aiming state visualization
-   * @param isAiming - Whether the enemy is currently aiming
    */
-  private setAimingVisual(isAiming: boolean): void {
-    if (isAiming) {
+  private setAimingVisual(_p0?: boolean): void {
+    if (this.isAiming) {
       this.element.classList.add('hunter-aiming');
     } else {
       this.element.classList.remove('hunter-aiming');
@@ -111,8 +113,9 @@ export class VampireHunter extends Enemy {
         if (distToPlayer <= this.detectionRadius) {
           this.state = 'aim';
           this.aimStartTime = now;
+          
           this.isAiming = true;
-          this.setAimingVisual(true);
+          this.setAimingVisual();
         } else {
           // Move slowly towards player
           this.x += dirX * this.speed * 0.5;
@@ -123,9 +126,9 @@ export class VampireHunter extends Enemy {
       case 'aim':
         // If player moves out of range while aiming, go back to patrol
         if (distToPlayer > this.detectionRadius) {
-          this.state = 'patrol';
+          this.state = 'patrol';          
           this.isAiming = false;
-          this.setAimingVisual(false);
+          this.setAimingVisual();
         } 
         // If aiming time completed, fire
         else if (now - this.aimStartTime >= this.aimingTime) {
@@ -158,16 +161,19 @@ export class VampireHunter extends Enemy {
         } else {
           // Good distance, start aiming again if cooldown elapsed
           if (now - this.lastFired >= this.projectileCooldown) {
+            
             this.state = 'aim';
             this.aimStartTime = now;
             this.isAiming = true;
-            this.setAimingVisual(true);
+            this.setAimingVisual();
           } else {
             // Strafe perpendicular to player
             const strafeDir = Math.random() > 0.5 ? 1 : -1;
             this.x += -dirY * this.speed * 0.5 * strafeDir;
             this.y += dirX * this.speed * 0.5 * strafeDir;
           }
+          
+          this.isAiming = false;
         }
         break;
     }
