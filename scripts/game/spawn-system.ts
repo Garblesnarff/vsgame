@@ -69,11 +69,14 @@ export class SpawnSystem {
    * @returns Newly spawned enemy or null
    */
   update(gameTime: number, playerLevel: number): Enemy | null {
-    // Adjust spawn rate based on player level
+    // Adjust spawn rates based on player level
     this.currentSpawnRate = Math.max(
       500,
       this.baseSpawnRate - playerLevel * 200
     );
+    
+    // Adjust swarm spawn rate - make swarms appear more frequently than hunters
+    const adjustedSwarmRate = Math.max(8000, this.swarmSpawnRate - playerLevel * 300);
     
     // Check if it's time to spawn a new regular enemy
     if (gameTime - this.lastSpawnTime > this.currentSpawnRate) {
@@ -87,8 +90,8 @@ export class SpawnSystem {
       return this.spawnVampireHunter(playerLevel);
     }
     
-    // Check if it's time to spawn a swarm
-    if (gameTime - this.lastSwarmSpawnTime > this.swarmSpawnRate) {
+    // Check if it's time to spawn a swarm - using adjusted rate
+    if (gameTime - this.lastSwarmSpawnTime > adjustedSwarmRate) {
       this.lastSwarmSpawnTime = gameTime;
       // Return the first swarmer, the rest will be added in spawnSwarm
       return this.spawnSwarm(playerLevel);
@@ -126,29 +129,63 @@ export class SpawnSystem {
   }
   
   /**
-   * Spawn a group of Fast Swarmers
-   * @param playerLevel - Current player level
+   * Spawn a group of Fast Swarmers in coordinated patterns
+   * @param playerLevel - Current level of the player
    * @returns First Fast Swarmer in the group
    */
   spawnSwarm(playerLevel: number): FastSwarmer {
-    // Calculate swarm size based on player level
-    const actualSwarmSize = this.swarmSize + Math.floor(playerLevel / 3);
+    // Generate a unique swarm ID to group these enemies
+    const swarmId = `swarm_${Date.now()}`;
     
-    // Create first swarmer
-    const firstSwarmer = new FastSwarmer(this.gameContainer, playerLevel);
+    // Calculate swarm size based on player level
+    const minSwarmers = 3; // Minimum swarm size
+    const actualSwarmSize = Math.max(minSwarmers, this.swarmSize + Math.floor(playerLevel / 3));
+    
+    console.debug(`Spawning coordinated swarm of ${actualSwarmSize} Fast Swarmers (ID: ${swarmId})`);
+    
+    // Calculate spawn points around a circle for a more coordinated swarm appearance
+    const spawnRadius = 300; // Distance from center point
+    const centerX = Math.random() * (CONFIG.GAME_WIDTH - 2 * spawnRadius) + spawnRadius;
+    const centerY = Math.random() * (CONFIG.GAME_HEIGHT - 2 * spawnRadius) + spawnRadius;
+    
+    // Create first swarmer at a position on the circle
+    const angle = Math.random() * Math.PI * 2;
+    const firstSwarmerX = centerX + Math.cos(angle) * spawnRadius;
+    const firstSwarmerY = centerY + Math.sin(angle) * spawnRadius;
+    
+    // Create first swarmer and manually set position
+    const firstSwarmer = new FastSwarmer(this.gameContainer, playerLevel, swarmId);
+    firstSwarmer.x = firstSwarmerX;
+    firstSwarmer.y = firstSwarmerY;
+    firstSwarmer.updatePosition();
+    
     GameEvents.emit(EVENTS.ENEMY_SPAWN, firstSwarmer, 'fastSwarmer');
     
-    // Create additional swarmers with slight delay
+    // Create additional swarmers at positions around the circle
     for (let i = 1; i < actualSwarmSize; i++) {
+      const spawnDelay = i * 150; // Quicker spawn sequence (150ms between each)
+      
       setTimeout(() => {
-        const swarmer = new FastSwarmer(this.gameContainer, playerLevel);
+        // Calculate position around the circle
+        const swarmAngle = angle + (i * (2 * Math.PI / actualSwarmSize));
+        const swarmX = centerX + Math.cos(swarmAngle) * spawnRadius;
+        const swarmY = centerY + Math.sin(swarmAngle) * spawnRadius;
+        
+        // Create swarmer with the same swarm ID for potential coordination
+        const swarmer = new FastSwarmer(this.gameContainer, playerLevel, swarmId);
+        swarmer.x = swarmX;
+        swarmer.y = swarmY;
+        swarmer.updatePosition();
+        
         GameEvents.emit(EVENTS.ENEMY_SPAWN, swarmer, 'fastSwarmer');
         
-        // Add to the game's enemies array if game reference is available
+        // Add to the game's enemies array
         if (this.game && this.game.enemies) {
           this.game.enemies.push(swarmer);
+        } else {
+          console.warn('Game reference unavailable - additional swarmers will not be tracked');
         }
-      }, i * 300); // 300ms between spawns
+      }, spawnDelay);
     }
     
     return firstSwarmer;
@@ -187,14 +224,22 @@ export class SpawnSystem {
     // Get how many brutes should spawn at this level
     const brutesNeeded = this.bruteSpawnCount.get(milestone) || 0;
     
-    // Add debugging
-    console.log(`Level ${playerLevel}, Milestone ${milestone}, Brutes needed: ${brutesNeeded}, Spawned: ${this.spawnedBrutesCount}`);
-    
     // Spawn if we haven't reached the quota for this level
     return this.spawnedBrutesCount < brutesNeeded;
   }
   
-  // Also make sure this method gets called after leveling up:
+  /**
+   * Set the game reference
+   * @param game - Game instance
+   */
+  setGameReference(game: any): void {
+    this.game = game;
+  }
+
+  /**
+   * Update spawn system for level change
+   * @param playerLevel - New player level
+   */
   updateForLevelChange(playerLevel: number): void {
     // Reset brute counter when level changes to ensure we get fresh spawns
     this.spawnedBrutesCount = 0;
@@ -209,14 +254,6 @@ export class SpawnSystem {
         level: playerLevel 
       });
     }
-  }
-
-  /**
-   * Set the game reference
-   * @param game - Game instance
-   */
-  setGameReference(game: any): void {
-    this.game = game;
   }
 
   /**

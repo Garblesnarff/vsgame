@@ -53,6 +53,8 @@ export class Game {
     this.gameLoop = new GameLoop();
     this.inputHandler = new InputHandler(this);
     this.spawnSystem = new SpawnSystem(this.gameContainer);
+    // Set game reference for the spawn system so it can add enemies
+    this.spawnSystem.setGameReference(this);
     this.particleSystem = new ParticleSystem(this.gameContainer);
 
     // Create player
@@ -163,10 +165,11 @@ export class Game {
     }
 
     const now = Date.now();
-    if (
-      now - (this.player.autoAttack?.lastFired ?? 0) <
-      (this.player.autoAttack?.cooldown ?? Infinity)
-    ) {
+    const timeSinceLastFired = now - (this.player.autoAttack?.lastFired ?? 0);
+    const cooldown = this.player.autoAttack?.cooldown ?? Infinity;
+
+    if (timeSinceLastFired < cooldown) {
+
       return;
     }
 
@@ -196,6 +199,7 @@ export class Game {
         closestEnemy,
         this.createProjectile.bind(this)
       );
+      this.player.autoAttack.lastFired = now;
     }
   }
 
