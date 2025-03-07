@@ -200,14 +200,15 @@ export class VampireHunter extends Enemy {
       targetX - sourceX
     );
     
-    // Create projectile
+    // Create projectile with isEnemyProjectile flag to prevent self-damage
     createProjectile({
       x: sourceX,
       y: sourceY,
       vx: Math.cos(angle) * this.projectileSpeed,
       vy: Math.sin(angle) * this.projectileSpeed,
       damage: this.projectileDamage,
-      isEnemyProjectile: true,
+      isEnemyProjectile: true,  // This flag is crucial!
+      isAutoAttack: false,      // Not an auto-attack
       className: "enemy-projectile",
       angle: angle
     });

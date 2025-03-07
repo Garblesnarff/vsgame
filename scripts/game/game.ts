@@ -1,6 +1,7 @@
 import { Player } from "../entities/player";
 import { Projectile, ProjectileOptions } from "../entities/projectile";
 import { Enemy } from "../entities/enemies/base-enemy";
+import { VampireHunter } from "../entities/enemies/vampire-hunter";
 import { GameLoop } from "./game-loop";
 import { InputHandler } from "./input-handler";
 import { SpawnSystem } from "./spawn-system";
@@ -11,7 +12,6 @@ import { GameStateManager, defaultStateHandlers } from "./state-manager";
 import { GameEvents, EVENTS } from "../utils/event-system";
 import CONFIG from "../config";
 import { GameState } from "../types/game-types";
-import VampireHunter from "../entities/enemies/vampire-hunter";
 
 /**
  * Main Game class that orchestrates all game systems
@@ -203,12 +203,12 @@ export class Game {
    * Update enemy movement and check for collisions
    * @param _deltaTime - Time since last update in ms
    */
-  updateEnemies(deltaTime: number): void {
+  updateEnemies(_deltaTime: number): void {
     for (let i = this.enemies.length - 1; i >= 0; i--) {
       const enemy = this.enemies[i];
-  
+
       // Move enemy towards player
-      // Pass the createProjectile function to vampire hunters
+      // Special handling for VampireHunter to pass createProjectile function
       if (enemy instanceof VampireHunter) {
         enemy.moveTowardsPlayer(this.player, this.createProjectile.bind(this));
       } else {
@@ -285,55 +285,81 @@ export class Game {
 
       let shouldRemoveProjectile = false;
 
-      // Check collision with enemies
-      for (let j = this.enemies.length - 1; j >= 0; j--) {
-        const enemy = this.enemies[j];
-
-        if (projectile.collidesWith(enemy)) {
-          // Create blood particles
+      // Handle enemy projectiles (they only collide with the player)
+      if (projectile.isEnemyProjectile) {
+        // Check collision with player
+        if (
+          this.player.isAlive &&
+          !this.player.isInvulnerable &&
+          projectile.collidesWithPlayer(this.player)
+        ) {
+          // Create hit effect
           this.particleSystem.createBloodParticles(
             projectile.x,
             projectile.y,
             5
           );
 
-          // Apply damage to enemy
-          if (
-            enemy.takeDamage(
-              projectile.damage,
-              this.particleSystem.createBloodParticles.bind(this.particleSystem)
-            )
-          ) {
-            // Enemy died
-            enemy.destroy();
-            this.enemies.splice(j, 1);
+          // Apply damage to player
+          this.player.takeDamage(projectile.damage);
 
-            // Emit enemy death event
-            GameEvents.emit(EVENTS.ENEMY_DEATH, enemy);
+          // Remove projectile
+          shouldRemoveProjectile = true;
+        }
+      } 
+      // Handle player projectiles (they only collide with enemies)
+      else {
+        // Check collision with enemies
+        for (let j = this.enemies.length - 1; j >= 0; j--) {
+          const enemy = this.enemies[j];
 
-            // Add kill to player and check for level up
-            if (this.levelSystem.addKill()) {
-              // Level up was handled by the callback
-            }
-          } else {
-            // Emit enemy damage event
-            GameEvents.emit(EVENTS.ENEMY_DAMAGE, enemy, projectile.damage);
-          }
-
-          // Handle Blood Lance special behavior
-          if (projectile.isBloodLance) {
-            shouldRemoveProjectile = projectile.handleBloodLanceHit(
-              enemy,
-              this.player.heal.bind(this.player)
+          if (projectile.collidesWith(enemy)) {
+            // Create blood particles
+            this.particleSystem.createBloodParticles(
+              projectile.x,
+              projectile.y,
+              5
             );
-          } else {
-            // Regular projectile or auto-attack - remove after hitting
-            shouldRemoveProjectile = true;
-          }
 
-          // Break loop for non-piercing projectiles
-          if (shouldRemoveProjectile && !projectile.isBloodLance) {
-            break;
+            // Apply damage to enemy
+            if (
+              enemy.takeDamage(
+                projectile.damage,
+                this.particleSystem.createBloodParticles.bind(this.particleSystem),
+                projectile.isBloodLance ? 'bloodLance' : undefined
+              )
+            ) {
+              // Enemy died
+              enemy.destroy();
+              this.enemies.splice(j, 1);
+
+              // Emit enemy death event
+              GameEvents.emit(EVENTS.ENEMY_DEATH, enemy);
+
+              // Add kill to player and check for level up
+              if (this.levelSystem.addKill()) {
+                // Level up was handled by the callback
+              }
+            } else {
+              // Emit enemy damage event
+              GameEvents.emit(EVENTS.ENEMY_DAMAGE, enemy, projectile.damage);
+            }
+
+            // Handle Blood Lance special behavior
+            if (projectile.isBloodLance) {
+              shouldRemoveProjectile = projectile.handleBloodLanceHit(
+                enemy,
+                this.player.heal.bind(this.player)
+              );
+            } else {
+              // Regular projectile or auto-attack - remove after hitting
+              shouldRemoveProjectile = true;
+            }
+
+            // Break loop for non-piercing projectiles
+            if (shouldRemoveProjectile && !projectile.isBloodLance) {
+              break;
+            }
           }
         }
       }
@@ -358,35 +384,38 @@ export class Game {
   }
 
   /**
- * Handle player level up
- */
-handleLevelUp(): void {
-  // Show level up notification
-  this.uiManager.showLevelUp();
+   * Handle player level up
+   */
+  handleLevelUp(): void {
+    // Show level up notification
+    this.uiManager.showLevelUp();
 
-  // Update spawn rate
-  const playerLevel = this.player.level;
-  this.spawnSystem.currentSpawnRate = Math.max(
-    500,
-    CONFIG.SPAWN_RATE - playerLevel * 200
-  );
+    // Update spawn rate
+    const playerLevel = this.player.level;
+    this.spawnSystem.currentSpawnRate = Math.max(
+      500,
+      CONFIG.SPAWN_RATE - playerLevel * 200
+    );
 
-  // Check for unlockable abilities
-  this.player.abilityManager.checkUnlockableAbilities();
-  
-  // Debug info
-  console.debug(`Level up handled. New level: ${playerLevel}`);
-  console.debug(`Blood Lance unlock level: ${CONFIG.ABILITIES.BLOOD_LANCE.UNLOCK_LEVEL}`);
-  console.debug(`Night Shield unlock level: ${CONFIG.ABILITIES.NIGHT_SHIELD.UNLOCK_LEVEL}`);
+    // Check for unlockable abilities
+    this.player.abilityManager.checkUnlockableAbilities();
+    
+    // Reset brute spawn count and update for the new level
+    this.spawnSystem.updateForLevelChange(playerLevel);
+    
+    // Debug info
+    console.debug(`Level up handled. New level: ${playerLevel}`);
+    console.debug(`Blood Lance unlock level: ${CONFIG.ABILITIES.BLOOD_LANCE.UNLOCK_LEVEL}`);
+    console.debug(`Night Shield unlock level: ${CONFIG.ABILITIES.NIGHT_SHIELD.UNLOCK_LEVEL}`);
 
-  // Also trigger skill menu to update in case it's open
-  if (this.player.showingSkillMenu && this.uiManager.skillMenu) {
-    this.uiManager.skillMenu.update();
+    // Also trigger skill menu to update in case it's open
+    if (this.player.showingSkillMenu && this.uiManager.skillMenu) {
+      this.uiManager.skillMenu.update();
+    }
+
+    // Heal player slightly
+    this.player.heal(20);
   }
-
-  // Heal player slightly
-  this.player.heal(20);
-}
 
   /**
    * Game over logic
@@ -534,13 +563,6 @@ handleLevelUp(): void {
    */
   toggleSkillMenu(): void {
     this.uiManager.toggleSkillMenu();
-
-    // Emit appropriate event
-    if (this.player.showingSkillMenu) {
-      GameEvents.emit(EVENTS.UI_SKILL_MENU_OPEN);
-    } else {
-      GameEvents.emit(EVENTS.UI_SKILL_MENU_CLOSE);
-    }
   }
 
   /**

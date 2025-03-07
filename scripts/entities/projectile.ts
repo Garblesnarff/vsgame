@@ -13,6 +13,7 @@ export interface ProjectileOptions {
   damage: number;
   isAutoAttack: boolean;
   isBloodLance?: boolean;
+  isEnemyProjectile?: boolean; // Added this flag
   pierce?: number;
   pierceCount?: number;
   healAmount?: number;
@@ -39,6 +40,7 @@ export class Projectile {
   damage: number;
   isAutoAttack: boolean;
   isBloodLance: boolean;
+  isEnemyProjectile: boolean; // Added this property
 
   // Blood Lance specific properties
   pierce: number;
@@ -64,6 +66,7 @@ export class Projectile {
     this.damage = options.damage || 0;
     this.isAutoAttack = options.isAutoAttack || false;
     this.isBloodLance = options.isBloodLance || false;
+    this.isEnemyProjectile = options.isEnemyProjectile || false; // Initialize enemy projectile flag
 
     // Blood Lance specific properties
     this.pierce = options.pierce || 3;
@@ -80,6 +83,8 @@ export class Projectile {
       this.element.style.backgroundColor = "#990099";
     } else if (this.isBloodLance) {
       this.element.className = "blood-lance";
+    } else if (this.isEnemyProjectile) {
+      this.element.classList.add("enemy-projectile");
     }
 
     // Set rotation if provided
@@ -140,6 +145,20 @@ export class Projectile {
       this.x < enemy.x + enemy.width &&
       this.y > enemy.y &&
       this.y < enemy.y + enemy.height
+    );
+  }
+
+  /**
+   * Checks if projectile hits the player
+   * @param player - Player to check collision with
+   * @returns Whether collision occurred
+   */
+  collidesWithPlayer(player: any): boolean {
+    return (
+      this.x > player.x &&
+      this.x < player.x + player.width &&
+      this.y > player.y &&
+      this.y < player.y + player.height
     );
   }
 
