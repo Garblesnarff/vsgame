@@ -273,8 +273,8 @@ export const CONFIG: GameConfig = {
     FAST_SWARMER: {
       WIDTH: 25, // Base values before applying multiplier
       HEIGHT: 25,
-      BASE_HEALTH: 50,
-      BASE_DAMAGE: 5,
+      BASE_HEALTH: 5,
+      BASE_DAMAGE: 1,
       SIZE_MULTIPLIER: 0.7, // Smaller than base enemies
       SPEED_MULTIPLIER: 2.2, // Much faster than base enemies
       HEALTH_MULTIPLIER: 0.4, // Less health than base enemies
