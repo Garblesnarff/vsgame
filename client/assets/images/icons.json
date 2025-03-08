@@ -1,0 +1,138 @@
+{
+    "frames": {
+      "health": {
+        "frame": { "x": 0, "y": 0, "w": 32, "h": 32 },
+        "rotated": false,
+        "trimmed": false,
+        "spriteSourceSize": { "x": 0, "y": 0, "w": 32, "h": 32 },
+        "sourceSize": { "w": 32, "h": 32 }
+      },
+      "energy": {
+        "frame": { "x": 32, "y": 0, "w": 32, "h": 32 },
+        "rotated": false,
+        "trimmed": false,
+        "spriteSourceSize": { "x": 0, "y": 0, "w": 32, "h": 32 },
+        "sourceSize": { "w": 32, "h": 32 }
+      },
+      "skull": {
+        "frame": { "x": 64, "y": 0, "w": 32, "h": 32 },
+        "rotated": false,
+        "trimmed": false,
+        "spriteSourceSize": { "x": 0, "y": 0, "w": 32, "h": 32 },
+        "sourceSize": { "w": 32, "h": 32 }
+      },
+      "level": {
+        "frame": { "x": 96, "y": 0, "w": 32, "h": 32 },
+        "rotated": false,
+        "trimmed": false,
+        "spriteSourceSize": { "x": 0, "y": 0, "w": 32, "h": 32 },
+        "sourceSize": { "w": 32, "h": 32 }
+      },
+      "corner": {
+        "frame": { "x": 128, "y": 0, "w": 32, "h": 32 },
+        "rotated": false,
+        "trimmed": false,
+        "spriteSourceSize": { "x": 0, "y": 0, "w": 32, "h": 32 },
+        "sourceSize": { "w": 32, "h": 32 }
+      },
+      "tree": {
+        "frame": { "x": 0, "y": 32, "w": 32, "h": 32 },
+        "rotated": false,
+        "trimmed": false,
+        "spriteSourceSize": { "x": 0, "y": 0, "w": 32, "h": 32 },
+        "sourceSize": { "w": 32, "h": 32 }
+      },
+      "rock": {
+        "frame": { "x": 32, "y": 32, "w": 32, "h": 32 },
+        "rotated": false,
+        "trimmed": false,
+        "spriteSourceSize": { "x": 0, "y": 0, "w": 32, "h": 32 },
+        "sourceSize": { "w": 32, "h": 32 }
+      },
+      "gravestone": {
+        "frame": { "x": 64, "y": 32, "w": 32, "h": 32 },
+        "rotated": false,
+        "trimmed": false,
+        "spriteSourceSize": { "x": 0, "y": 0, "w": 32, "h": 32 },
+        "sourceSize": { "w": 32, "h": 32 }
+      },
+      "shrub": {
+        "frame": { "x": 96, "y": 32, "w": 32, "h": 32 },
+        "rotated": false,
+        "trimmed": false,
+        "spriteSourceSize": { "x": 0, "y": 0, "w": 32, "h": 32 },
+        "sourceSize": { "w": 32, "h": 32 }
+      },
+      "bloodDrain": {
+        "frame": { "x": 0, "y": 64, "w": 32, "h": 32 },
+        "rotated": false,
+        "trimmed": false,
+        "spriteSourceSize": { "x": 0, "y": 0, "w": 32, "h": 32 },
+        "sourceSize": { "w": 32, "h": 32 }
+      },
+      "batSwarm": {
+        "frame": { "x": 32, "y": 64, "w": 32, "h": 32 },
+        "rotated": false,
+        "trimmed": false,
+        "spriteSourceSize": { "x": 0, "y": 0, "w": 32, "h": 32 },
+        "sourceSize": { "w": 32, "h": 32 }
+      },
+      "shadowDash": {
+        "frame": { "x": 64, "y": 64, "w": 32, "h": 32 },
+        "rotated": false,
+        "trimmed": false,
+        "spriteSourceSize": { "x": 0, "y": 0, "w": 32, "h": 32 },
+        "sourceSize": { "w": 32, "h": 32 }
+      },
+      "bloodLance": {
+        "frame": { "x": 96, "y": 64, "w": 32, "h": 32 },
+        "rotated": false,
+        "trimmed": false,
+        "spriteSourceSize": { "x": 0, "y": 0, "w": 32, "h": 32 },
+        "sourceSize": { "w": 32, "h": 32 }
+      },
+      "nightShield": {
+        "frame": { "x": 128, "y": 64, "w": 32, "h": 32 },
+        "rotated": false,
+        "trimmed": false,
+        "spriteSourceSize": { "x": 0, "y": 0, "w": 32, "h": 32 },
+        "sourceSize": { "w": 32, "h": 32 }
+      },
+      "poisonTouch": {
+        "frame": { "x": 0, "y": 96, "w": 32, "h": 32 },
+        "rotated": false,
+        "trimmed": false,
+        "spriteSourceSize": { "x": 0, "y": 0, "w": 32, "h": 32 },
+        "sourceSize": { "w": 32, "h": 32 }
+      },
+      "bloodRitual": {
+        "frame": { "x": 32, "y": 96, "w": 32, "h": 32 },
+        "rotated": false,
+        "trimmed": false,
+        "spriteSourceSize": { "x": 0, "y": 0, "w": 32, "h": 32 },
+        "sourceSize": { "w": 32, "h": 32 }
+      },
+      "dominate": {
+        "frame": { "x": 64, "y": 96, "w": 32, "h": 32 },
+        "rotated": false,
+        "trimmed": false,
+        "spriteSourceSize": { "x": 0, "y": 0, "w": 32, "h": 32 },
+        "sourceSize": { "w": 32, "h": 32 }
+      },
+      "mesmerize": {
+        "frame": { "x": 96, "y": 96, "w": 32, "h": 32 },
+        "rotated": false,
+        "trimmed": false,
+        "spriteSourceSize": { "x": 0, "y": 0, "w": 32, "h": 32 },
+        "sourceSize": { "w": 32, "h": 32 }
+      }
+    },
+    "meta": {
+      "app": "vampire-survival-multiplayer",
+      "version": "1.0.0",
+      "image": "icons.png",
+      "format": "RGBA8888",
+      "size": { "w": 160, "h": 128 },
+      "scale": "1"
+    }
+  }
