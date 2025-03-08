@@ -115,6 +115,12 @@ type("string")(MinionSchema.prototype, "ownerId");
 type("string")(MinionSchema.prototype, "clanId");
 type("number")(MinionSchema.prototype, "radius");
 
+// Bonuses schema for Blood Pacts (define this BEFORE BloodPactSchema)
+class BonusesSchema extends Schema {}
+
+type("number")(BonusesSchema.prototype, "cooldownReduction");
+type("number")(BonusesSchema.prototype, "damageBoost");
+
 // Blood Pact schema
 class BloodPactSchema extends Schema {
   constructor() {
@@ -127,12 +133,6 @@ class BloodPactSchema extends Schema {
 type("string")(BloodPactSchema.prototype, "id");
 type(["string"])(BloodPactSchema.prototype, "members");
 type(BonusesSchema)(BloodPactSchema.prototype, "bonuses");
-
-// Bonuses schema for Blood Pacts
-class BonusesSchema extends Schema {}
-
-type("number")(BonusesSchema.prototype, "cooldownReduction");
-type("number")(BonusesSchema.prototype, "damageBoost");
 
 // Main game state
 class VampireGameState extends Schema {

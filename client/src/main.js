@@ -39,8 +39,11 @@ window.gameState = {
   abilities: []
 };
 
-// Initialize UI elements
+// Initialize UI elements - This function runs when the page loads
 document.addEventListener('DOMContentLoaded', function() {
+  console.log("DOM loaded, setting up UI elements");
+  
+  // Get references to the UI elements
   const joinButton = document.getElementById('join-button');
   const usernameInput = document.getElementById('username');
   const clanSelect = document.getElementById('clan');
@@ -48,59 +51,79 @@ document.addEventListener('DOMContentLoaded', function() {
   const loginScreen = document.getElementById('login-screen');
   const loadingScreen = document.getElementById('loading-screen');
   
+  console.log("Join button element:", joinButton);
+  
   // Change clan info based on selection
-  clanSelect.addEventListener('change', function() {
-    const selectedClan = clanSelect.value;
-    let clanDescription = '';
-    
-    switch(selectedClan) {
-      case 'Nosferatu':
-        clanDescription = '<strong>Nosferatu:</strong> Stealth and poison abilities, higher durability.';
-        break;
-      case 'Tremere':
-        clanDescription = '<strong>Tremere:</strong> Blood magic specialization with AoE attacks.';
-        break;
-      case 'Ventrue':
-        clanDescription = '<strong>Ventrue:</strong> Command abilities to temporarily control enemies.';
-        break;
-      case 'Toreador':
-        clanDescription = '<strong>Toreador:</strong> Speed and charm abilities to distract enemies.';
-        break;
-    }
-    
-    clanInfo.innerHTML = clanDescription;
-  });
+  if (clanSelect) {
+    clanSelect.addEventListener('change', function() {
+      console.log("Clan selected:", clanSelect.value);
+      const selectedClan = clanSelect.value;
+      let clanDescription = '';
+      
+      switch(selectedClan) {
+        case 'Nosferatu':
+          clanDescription = '<strong>Nosferatu:</strong> Stealth and poison abilities, higher durability.';
+          break;
+        case 'Tremere':
+          clanDescription = '<strong>Tremere:</strong> Blood magic specialization with AoE attacks.';
+          break;
+        case 'Ventrue':
+          clanDescription = '<strong>Ventrue:</strong> Command abilities to temporarily control enemies.';
+          break;
+        case 'Toreador':
+          clanDescription = '<strong>Toreador:</strong> Speed and charm abilities to distract enemies.';
+          break;
+      }
+      
+      if (clanInfo) {
+        clanInfo.innerHTML = clanDescription;
+      }
+    });
+  }
   
   // Join button click handler
-  joinButton.addEventListener('click', async function() {
-    const username = usernameInput.value.trim();
-    const clan = clanSelect.value;
+  if (joinButton) {
+    console.log("Setting up join button click handler");
     
-    if (!username) {
-      alert('Please enter a username');
-      return;
-    }
-    
-    // Store username and clan
-    window.gameState.username = username;
-    window.gameState.clan = clan;
-    
-    // Show loading screen
-    loginScreen.style.display = 'none';
-    loadingScreen.style.display = 'flex';
-    
-    // Connect to Colyseus server
-    try {
-      await connectToServer();
-    } catch (error) {
-      console.error("Could not connect to server:", error);
-      alert('Failed to connect to server. Please try again.');
+    joinButton.addEventListener("click", async function() {
+      console.log("Join button clicked!");
+      alert("Join button clicked! Attempting to connect...");
       
-      // Show login screen again
-      loginScreen.style.display = 'flex';
-      loadingScreen.style.display = 'none';
-    }
-  });
+      const username = usernameInput ? usernameInput.value.trim() : '';
+      const clan = clanSelect ? clanSelect.value : 'Nosferatu';
+      
+      if (!username) {
+        alert('Please enter a username');
+        return;
+      }
+      
+      console.log("Username:", username, "Clan:", clan);
+      
+      // Store username and clan
+      window.gameState.username = username;
+      window.gameState.clan = clan;
+      
+      // Show loading screen
+      if (loginScreen) loginScreen.style.display = 'none';
+      if (loadingScreen) loadingScreen.style.display = 'flex';
+      
+      // Connect to Colyseus server
+      try {
+        console.log("Attempting to connect to server...");
+        await connectToServer();
+      } catch (error) {
+        console.error("Could not connect to server:", error);
+        alert('Failed to connect to server. Please try again.');
+        
+        // Show login screen again
+        if (loginScreen) loginScreen.style.display = 'flex';
+        if (loadingScreen) loadingScreen.style.display = 'none';
+      }
+    });
+  } else {
+    console.error("Join button not found on the page!");
+    alert("Error: Join button not found on the page!");
+  }
 });
 
 /**
@@ -108,17 +131,20 @@ document.addEventListener('DOMContentLoaded', function() {
  */
 async function connectToServer() {
   try {
+    console.log("Creating Colyseus client...");
     // Create Colyseus client
     const client = new Colyseus.Client('ws://localhost:2567');
     window.gameState.client = client;
     window.gameState.connected = true;
     
+    console.log("Joining room...");
     // Join a vampire_game room
     const room = await client.joinOrCreate('vampire_game', {
       username: window.gameState.username,
       clan: window.gameState.clan
     });
     
+    console.log("Room joined successfully!");
     window.gameState.room = room;
     window.gameState.roomJoined = true;
     
@@ -134,6 +160,7 @@ async function connectToServer() {
     return room;
   } catch (error) {
     console.error("Error connecting to server:", error);
+    alert("Connection error: " + error.message);
     throw error;
   }
 }

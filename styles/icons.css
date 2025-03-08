@@ -1,0 +1,297 @@
+/* CSS-based icons as fallback for sprite sheets */
+.css-icon {
+    display: inline-block;
+    width: 32px;
+    height: 32px;
+    position: relative;
+    border-radius: 4px;
+  }
+  
+  /* Health icon - red heart */
+  .css-icon-health {
+    background-color: #ff0000;
+    clip-path: polygon(
+      50% 0%, 
+      61% 35%, 
+      98% 35%, 
+      68% 57%, 
+      79% 91%, 
+      50% 70%, 
+      21% 91%, 
+      32% 57%, 
+      2% 35%, 
+      39% 35%
+    );
+  }
+  
+  /* Energy icon - blue lightning bolt */
+  .css-icon-energy {
+    background-color: #00b3ff;
+    clip-path: polygon(
+      50% 0%, 
+      65% 50%, 
+      80% 50%, 
+      35% 100%, 
+      45% 55%, 
+      30% 55%
+    );
+  }
+  
+  /* Skull icon for kills */
+  .css-icon-skull {
+    background-color: #ffffff;
+    border-radius: 50% 50% 0 0;
+  }
+  
+  .css-icon-skull::before {
+    content: "";
+    position: absolute;
+    width: 8px;
+    height: 8px;
+    background-color: #000000;
+    border-radius: 50%;
+    top: 12px;
+    left: 6px;
+  }
+  
+  .css-icon-skull::after {
+    content: "";
+    position: absolute;
+    width: 8px;
+    height: 8px;
+    background-color: #000000;
+    border-radius: 50%;
+    top: 12px;
+    right: 6px;
+  }
+  
+  /* Level icon - star */
+  .css-icon-level {
+    background-color: transparent;
+  }
+  
+  .css-icon-level::before {
+    content: "";
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    background-color: #ffcc00;
+    clip-path: polygon(
+      50% 0%, 
+      61% 35%, 
+      98% 35%, 
+      68% 57%, 
+      79% 91%, 
+      50% 70%, 
+      21% 91%, 
+      32% 57%, 
+      2% 35%, 
+      39% 35%
+    );
+  }
+  
+  /* Corner icon */
+  .css-icon-corner {
+    background-color: #6a0dad;
+    clip-path: polygon(0 0, 100% 0, 0 100%);
+  }
+  
+  /* Tree icon */
+  .css-icon-tree {
+    background-color: #228b22;
+    clip-path: polygon(
+      50% 0%, 
+      30% 30%, 
+      20% 30%, 
+      40% 50%, 
+      30% 50%, 
+      50% 70%, 
+      25% 70%, 
+      50% 100%, 
+      75% 70%, 
+      50% 70%, 
+      70% 50%, 
+      60% 50%, 
+      80% 30%, 
+      70% 30%
+    );
+  }
+  
+  /* Rock icon */
+  .css-icon-rock {
+    background-color: #808080;
+    border-radius: 40% 60% 60% 40% / 60% 30% 70% 40%;
+  }
+  
+  /* Gravestone icon */
+  .css-icon-gravestone {
+    background-color: #a9a9a9;
+    clip-path: polygon(
+      20% 100%, 
+      20% 40%, 
+      30% 30%, 
+      70% 30%, 
+      80% 40%, 
+      80% 100%
+    );
+  }
+  
+  /* Shrub icon */
+  .css-icon-shrub {
+    background-color: #3cb371;
+    border-radius: 50% 50% 20% 20% / 60% 60% 40% 40%;
+  }
+  
+  /* Blood Drain ability */
+  .css-icon-bloodDrain {
+    background-color: #8b0000;
+    border-radius: 50%;
+  }
+  
+  .css-icon-bloodDrain::before {
+    content: "";
+    position: absolute;
+    width: 50%;
+    height: 50%;
+    background-color: #ff0000;
+    border-radius: 50%;
+    top: 25%;
+    left: 25%;
+  }
+  
+  /* Bat Swarm ability */
+  .css-icon-batSwarm {
+    background-color: #4b0082;
+  }
+  
+  .css-icon-batSwarm::before {
+    content: "";
+    position: absolute;
+    width: 100%;
+    height: 60%;
+    background-color: #4b0082;
+    clip-path: polygon(
+      0% 50%, 
+      25% 0%, 
+      75% 0%, 
+      100% 50%
+    );
+    top: 20%;
+    left: 0;
+  }
+  
+  /* Shadow Dash ability */
+  .css-icon-shadowDash {
+    background-color: #000000;
+    clip-path: polygon(
+      0% 50%, 
+      40% 0%, 
+      40% 30%, 
+      100% 30%, 
+      100% 70%, 
+      40% 70%, 
+      40% 100%
+    );
+  }
+  
+  /* Blood Lance ability */
+  .css-icon-bloodLance {
+    background-color: #8b0000;
+    clip-path: polygon(
+      0% 40%, 
+      100% 0%, 
+      100% 20%, 
+      0% 60%, 
+      100% 100%, 
+      100% 80%
+    );
+  }
+  
+  /* Night Shield ability */
+  .css-icon-nightShield {
+    background-color: #4b0082;
+    border-radius: 50%;
+    border: 4px solid #8a2be2;
+    box-sizing: border-box;
+  }
+  
+  /* Poison Touch ability */
+  .css-icon-poisonTouch {
+    background-color: #4b8b3b;
+    border-radius: 50%;
+  }
+  
+  .css-icon-poisonTouch::before {
+    content: "";
+    position: absolute;
+    width: 40%;
+    height: 40%;
+    background-color: #a6c93c;
+    border-radius: 50%;
+    top: 10%;
+    left: 10%;
+  }
+  
+  .css-icon-poisonTouch::after {
+    content: "";
+    position: absolute;
+    width: 30%;
+    height: 30%;
+    background-color: #a6c93c;
+    border-radius: 50%;
+    bottom: 15%;
+    right: 15%;
+  }
+  
+  /* Blood Ritual ability */
+  .css-icon-bloodRitual {
+    background-color: #8b0000;
+    clip-path: circle(50%);
+  }
+  
+  .css-icon-bloodRitual::before {
+    content: "";
+    position: absolute;
+    width: 70%;
+    height: 70%;
+    border: 3px solid #ff0000;
+    border-radius: 50%;
+    top: 15%;
+    left: 15%;
+    box-sizing: border-box;
+  }
+  
+  /* Dominate ability */
+  .css-icon-dominate {
+    background-color: #000099;
+    clip-path: circle(50%);
+  }
+  
+  .css-icon-dominate::before {
+    content: "";
+    position: absolute;
+    width: 60%;
+    height: 30%;
+    background-color: #ffffff;
+    clip-path: polygon(0% 0%, 100% 50%, 0% 100%);
+    top: 35%;
+    left: 30%;
+  }
+  
+  /* Mesmerize ability */
+  .css-icon-mesmerize {
+    background-color: #990066;
+    clip-path: circle(50%);
+  }
+  
+  .css-icon-mesmerize::before {
+    content: "";
+    position: absolute;
+    width: 80%;
+    height: 80%;
+    border: 3px solid #ffffff;
+    border-radius: 50%;
+    top: 10%;
+    left: 10%;
+    box-sizing: border-box;
+  }
