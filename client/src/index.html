@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Vampire Survival Multiplayer</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            background-color: #000;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            font-family: Arial, sans-serif;
+            color: #fff;
+        }
+        #game-container {
+            width: 100%;
+            height: 100%;
+            max-width: 1280px;
+            max-height: 720px;
+            position: relative;
+        }
+        #ui-container {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 10;
+        }
+        .login-screen {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.8);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            z-index: 20;
+        }
+        .login-form {
+            background-color: #1a0f2e;
+            border: 2px solid #6a1cb7;
+            padding: 20px;
+            border-radius: 10px;
+            width: 300px;
+            pointer-events: auto;
+        }
+        .login-form h2 {
+            text-align: center;
+            color: #b973ff;
+            margin-top: 0;
+        }
+        .form-group {
+            margin-bottom: 15px;
+        }
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+            color: #b973ff;
+        }
+        .form-group input {
+            width: 100%;
+            padding: 8px;
+            border-radius: 5px;
+            border: 1px solid #6a1cb7;
+            background-color: #2a1b3d;
+            color: #fff;
+            box-sizing: border-box;
+        }
+        .form-group select {
+            width: 100%;
+            padding: 8px;
+            border-radius: 5px;
+            border: 1px solid #6a1cb7;
+            background-color: #2a1b3d;
+            color: #fff;
+            box-sizing: border-box;
+        }
+        .btn {
+            width: 100%;
+            padding: 10px;
+            border-radius: 5px;
+            border: none;
+            background-color: #6a1cb7;
+            color: #fff;
+            font-weight: bold;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+        .btn:hover {
+            background-color: #8a2be2;
+        }
+        .clan-info {
+            margin-top: 10px;
+            font-size: 0.8em;
+            color: #ddd;
+        }
+        #loading-screen {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: #000;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            z-index: 30;
+        }
+        .loader {
+            border: 6px solid #1a0f2e;
+            border-top: 6px solid #8a2be2;
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            animation: spin 2s linear infinite;
+            margin-bottom: 20px;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body>
+    <div id="game-container">
+        <!-- Phaser will render here -->
+    </div>
+    
+    <div id="ui-container">
+        <!-- UI elements will be added here -->
+    </div>
+    
+    <div id="login-screen" class="login-screen">
+        <div class="login-form">
+            <h2>Vampire Survival</h2>
+            <div class="form-group">
+                <label for="username">Username</label>
+                <input type="text" id="username" placeholder="Enter your username">
+            </div>
+            <div class="form-group">
+                <label for="clan">Choose Your Clan</label>
+                <select id="clan">
+                    <option value="Nosferatu">Nosferatu</option>
+                    <option value="Tremere">Tremere</option>
+                    <option value="Ventrue">Ventrue</option>
+                    <option value="Toreador">Toreador</option>
+                </select>
+            </div>
+            <div class="clan-info" id="clan-info">
+                <strong>Nosferatu:</strong> Stealth and poison abilities, higher durability.
+            </div>
+            <div class="form-group">
+                <button id="join-button" class="btn">Join Game</button>
+            </div>
+        </div>
+    </div>
+    
+    <div id="loading-screen" style="display: none;">
+        <div class="loader"></div>
+        <div>Connecting to the night...</div>
+    </div>
+
+    <!-- Scripts will be injected by webpack -->
+</body>
+</html>

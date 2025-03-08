@@ -1,0 +1,25 @@
+{
+    "name": "vampire-survival-server",
+    "version": "1.0.0",
+    "description": "Multiplayer server for Vampire Survival Game",
+    "main": "index.js",
+    "scripts": {
+      "start": "node index.js",
+      "dev": "nodemon --watch '*.js' --exec node index.js",
+      "test": "echo \"Error: no test specified\" && exit 1"
+    },
+    "dependencies": {
+      "@colyseus/monitor": "^0.14.0",
+      "@colyseus/schema": "^1.0.42",
+      "colyseus": "^0.14.0",
+      "cors": "^2.8.5",
+      "express": "^4.17.1"
+    },
+    "devDependencies": {
+      "nodemon": "^2.0.12"
+    },
+    "engines": {
+      "node": ">=14.x"
+    },
+    "private": true
+  }
