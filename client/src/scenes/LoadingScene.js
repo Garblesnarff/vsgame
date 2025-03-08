@@ -4,6 +4,252 @@ import Phaser from 'phaser';
 export class LoadingScene extends Phaser.Scene {
   constructor() {
     super('LoadingScene');
+    this.assetsLoaded = 0;
+    this.assetsFailed = 0;
+  }
+  
+  /**
+   * Create fallback assets for any missing ones
+   */
+  createFallbackAssets() {
+    // Create a fallback icons texture if it doesn't exist
+    if (!this.textures.exists('icons')) {
+      console.log("Creating fallback icons");
+      this.createFallbackIcons();
+    }
+  }
+  
+  /**
+   * Create a fallback icons texture
+   */
+  create() {
+    // Create animations for player characters
+    this.createPlayerAnimations();
+    
+    // Create animations for enemies
+    this.createEnemyAnimations();
+    
+    // Create animations for ability effects
+    this.createAbilityAnimations();
+    
+    // Create animations for particles
+    this.createParticleAnimations();
+    
+    // Start the game scene if we're connected to a room
+    if (window.gameState.roomJoined) {
+      this.scene.start('GameScene');
+    } else {
+      // Otherwise stay at the loading screen until we join a room
+      // The logic in main.js will take care of starting the game scene
+      
+      // Add some text to indicate we're waiting for server connection
+      const width = this.cameras.main.width;
+      const height = this.cameras.main.height;
+      
+      this.add.text(width / 2, height / 2, 'Connecting to server...\nPlease wait...', {
+        font: '20px monospace',
+        fill: '#ffffff',
+        align: 'center'
+      }).setOrigin(0.5, 0.5);
+    }
+  }
+  
+  createPlayerAnimations() {
+    // Only create animations if textures exist
+    const createIfExists = (key, animConfig) => {
+      if (this.textures.exists(key)) {
+        this.anims.create(animConfig);
+      }
+    };
+    
+    const clans = ['nosferatu', 'tremere', 'ventrue', 'toreador'];
+    
+    clans.forEach(clan => {
+      const key = `vampire-${clan}`;
+      if (this.textures.exists(key)) {
+        // Idle animation
+        createIfExists(key, {
+          key: `${clan}-idle`,
+          frames: this.anims.generateFrameNumbers(key, { start: 0, end: 3 }),
+          frameRate: 5,
+          repeat: -1
+        });
+        
+        // Walk animation
+        createIfExists(key, {
+          key: `${clan}-walk`,
+          frames: this.anims.generateFrameNumbers(key, { start: 4, end: 11 }),
+          frameRate: 10,
+          repeat: -1
+        });
+      } else {
+        console.warn(`Texture for ${key} not found, skipping animations`);
+      }
+    });
+  }
+  
+  createEnemyAnimations() {
+    // Only create animations if textures exist
+    const createIfExists = (key, animConfig) => {
+      if (this.textures.exists(key)) {
+        this.anims.create(animConfig);
+      }
+    };
+    
+    const enemyTypes = ['basic', 'hunter', 'swarm', 'brute'];
+    
+    enemyTypes.forEach(type => {
+      const key = `enemy-${type}`;
+      if (this.textures.exists(key)) {
+        // Idle animation
+        createIfExists(key, {
+          key: `enemy-${type}-idle`,
+          frames: this.anims.generateFrameNumbers(key, { start: 0, end: 3 }),
+          frameRate: 5,
+          repeat: -1
+        });
+        
+        // Walk animation
+        createIfExists(key, {
+          key: `enemy-${type}-walk`,
+          frames: this.anims.generateFrameNumbers(key, { start: 4, end: 11 }),
+          frameRate: 10,
+          repeat: -1
+        });
+        
+        // Attack animation (only for some types)
+        if (type === 'hunter' || type === 'brute') {
+          createIfExists(key, {
+            key: `enemy-${type}-attack`,
+            frames: this.anims.generateFrameNumbers(key, { start: 12, end: 15 }),
+            frameRate: 10,
+            repeat: 0
+          });
+        }
+      } else {
+        console.warn(`Texture for ${key} not found, skipping animations`);
+      }
+    });
+  }
+  
+  createAbilityAnimations() {
+    // Only create animations if textures exist
+    const createIfExists = (key, animConfig) => {
+      if (this.textures.exists(key)) {
+        this.anims.create(animConfig);
+      }
+    };
+    
+    const abilities = [
+      { key: 'blood-drain', frames: 10, frameRate: 10, repeat: -1 },
+      { key: 'bat-swarm', frames: 8, frameRate: 12, repeat: -1 },
+      { key: 'shadow-dash', frames: 6, frameRate: 15, repeat: 0 },
+      { key: 'blood-lance', frames: 4, frameRate: 10, repeat: -1 },
+      { key: 'night-shield', frames: 8, frameRate: 8, repeat: -1 },
+      { key: 'poison-touch', frames: 8, frameRate: 12, repeat: 0 },
+      { key: 'blood-ritual', frames: 12, frameRate: 10, repeat: 0 },
+      { key: 'dominate', frames: 6, frameRate: 8, repeat: 0 },
+      { key: 'mesmerize', frames: 10, frameRate: 10, repeat: 0 }
+    ];
+    
+    abilities.forEach(ability => {
+      const key = ability.key;
+      if (this.textures.exists(key)) {
+        createIfExists(key, {
+          key: `${key}-effect`,
+          frames: this.anims.generateFrameNumbers(key, { start: 0, end: ability.frames - 1 }),
+          frameRate: ability.frameRate,
+          repeat: ability.repeat
+        });
+      } else {
+        console.warn(`Texture for ${key} not found, skipping animations`);
+      }
+    });
+  }
+  
+  createParticleAnimations() {
+    // Only create animations if textures exist
+    const createIfExists = (key, animConfig) => {
+      if (this.textures.exists(key)) {
+        this.anims.create(animConfig);
+      }
+    };
+    
+    const particles = [
+      { key: 'blood-particle', frames: 6, frameRate: 12, repeat: 0 },
+      { key: 'shadow-particle', frames: 6, frameRate: 12, repeat: 0 }
+    ];
+    
+    particles.forEach(particle => {
+      const key = particle.key;
+      if (this.textures.exists(key)) {
+        createIfExists(key, {
+          key: `${key}-effect`,
+          frames: this.anims.generateFrameNumbers(key, { start: 0, end: particle.frames - 1 }),
+          frameRate: particle.frameRate,
+          repeat: particle.repeat
+        });
+      } else {
+        console.warn(`Texture for ${key} not found, skipping animations`);
+      }
+    });
+  }
+  
+  createFallbackIcons() {
+    // We'll create a basic icon sheet with colored rectangles
+    const graphics = this.make.graphics();
+    
+    // Define some basic colors for common icons
+    const colors = [
+      0xff0000, // health - red
+      0x00b3ff, // energy - blue
+      0x444444, // skull - dark gray
+      0xffcc00, // level - gold
+      0x6a0dad  // corner - purple
+    ];
+    
+    // Create a grid of colored rectangles
+    for (let y = 0; y < 4; y++) {
+      for (let x = 0; x < 5; x++) {
+        const index = y * 5 + x;
+        const color = colors[index % colors.length];
+        
+        graphics.fillStyle(color);
+        graphics.fillRect(x * 32, y * 32, 32, 32);
+        graphics.lineStyle(1, 0xffffff);
+        graphics.strokeRect(x * 32, y * 32, 32, 32);
+      }
+    }
+    
+    graphics.generateTexture('icons-fallback', 160, 128);
+    
+    // Create an atlas with frame data
+    const frames = {};
+    
+    // Create frames for commonly needed icons
+    const iconNames = [
+      'health', 'energy', 'skull', 'level', 'corner',
+      'tree', 'rock', 'gravestone', 'shrub',
+      'bloodDrain', 'batSwarm', 'shadowDash', 'bloodLance', 'nightShield',
+      'poisonTouch', 'bloodRitual', 'dominate', 'mesmerize'
+    ];
+    
+    // Create frames in a grid pattern
+    for (let i = 0; i < iconNames.length; i++) {
+      const x = (i % 5) * 32;
+      const y = Math.floor(i / 5) * 32;
+      
+      frames[iconNames[i]] = {
+        frame: { x, y, w: 32, h: 32 },
+        rotated: false,
+        trimmed: false,
+        spriteSourceSize: { x: 0, y: 0, w: 32, h: 32 },
+        sourceSize: { w: 32, h: 32 }
+      };
+    }
+    
+    // Add the frames to the texture
+    this.textures.addAtlas('icons', this.textures.get('icons-fallback').getSourceImage(), { frames });
   }
 
   preload() {
@@ -53,6 +299,13 @@ export class LoadingScene extends Phaser.Scene {
     });
     assetText.setOrigin(0.5, 0.5);
     
+    // Setup error handling
+    this.load.on('loaderror', (fileObj) => {
+      console.warn(`Error loading asset: ${fileObj.key}`);
+      this.assetsFailed++;
+      assetText.setText(`Failed: ${fileObj.key}\nLoading next asset...`);
+    });
+    
     // Update progress bar as assets load
     this.load.on('progress', (value) => {
       progressBar.clear();
@@ -62,8 +315,9 @@ export class LoadingScene extends Phaser.Scene {
     });
     
     // Update the asset text as files load
-    this.load.on('fileprogress', (file) => {
-      assetText.setText('Loading: ' + file.key);
+    this.load.on('filecomplete', (key, type, data) => {
+      this.assetsLoaded++;
+      assetText.setText('Loading: ' + key);
     });
     
     // Remove progress bar when loading completes
@@ -73,409 +327,239 @@ export class LoadingScene extends Phaser.Scene {
       loadingText.destroy();
       percentText.destroy();
       assetText.destroy();
+      
+      console.log(`Assets loaded: ${this.assetsLoaded}, failed: ${this.assetsFailed}`);
+      
+      // Create fallbacks for any missing assets
+      this.createFallbackAssets();
     });
     
     // Load all game assets
     this.loadAssets();
   }
 
+  /**
+   * Attempt to load assets with fallbacks for missing files
+   */
   loadAssets() {
-    // Load player sprites
-    this.load.spritesheet('vampire-nosferatu', 'assets/images/vampire-nosferatu.png', { 
-      frameWidth: 64, 
-      frameHeight: 64 
-    });
-    this.load.spritesheet('vampire-tremere', 'assets/images/vampire-tremere.png', { 
-      frameWidth: 64, 
-      frameHeight: 64 
-    });
-    this.load.spritesheet('vampire-ventrue', 'assets/images/vampire-ventrue.png', { 
-      frameWidth: 64, 
-      frameHeight: 64 
-    });
-    this.load.spritesheet('vampire-toreador', 'assets/images/vampire-toreador.png', { 
-      frameWidth: 64, 
-      frameHeight: 64 
-    });
-    
-    // Load enemy sprites
-    this.load.spritesheet('enemy-basic', 'assets/images/enemy-basic.png', { 
-      frameWidth: 48, 
-      frameHeight: 48 
-    });
-    this.load.spritesheet('enemy-hunter', 'assets/images/enemy-hunter.png', { 
-      frameWidth: 48, 
-      frameHeight: 64 
-    });
-    this.load.spritesheet('enemy-swarm', 'assets/images/enemy-swarm.png', { 
-      frameWidth: 32, 
-      frameHeight: 32 
-    });
-    this.load.spritesheet('enemy-brute', 'assets/images/enemy-brute.png', { 
-      frameWidth: 80, 
-      frameHeight: 80 
-    });
-    
-    // Load ability effects
-    this.load.spritesheet('blood-drain', 'assets/images/blood-drain.png', { 
-      frameWidth: 128, 
-      frameHeight: 128 
-    });
-    this.load.spritesheet('bat-swarm', 'assets/images/bat-swarm.png', { 
-      frameWidth: 32, 
-      frameHeight: 32 
-    });
-    this.load.spritesheet('shadow-dash', 'assets/images/shadow-dash.png', { 
-      frameWidth: 64, 
-      frameHeight: 64 
-    });
-    this.load.spritesheet('blood-lance', 'assets/images/blood-lance.png', { 
-      frameWidth: 96, 
-      frameHeight: 32 
-    });
-    this.load.spritesheet('night-shield', 'assets/images/night-shield.png', { 
-      frameWidth: 128, 
-      frameHeight: 128 
-    });
-    this.load.spritesheet('poison-touch', 'assets/images/poison-touch.png', { 
-      frameWidth: 64, 
-      frameHeight: 64 
-    });
-    this.load.spritesheet('blood-ritual', 'assets/images/blood-ritual.png', { 
-      frameWidth: 128, 
-      frameHeight: 128 
-    });
-    this.load.spritesheet('dominate', 'assets/images/dominate.png', { 
-      frameWidth: 64, 
-      frameHeight: 64 
-    });
-    this.load.spritesheet('mesmerize', 'assets/images/mesmerize.png', { 
-      frameWidth: 96, 
-      frameHeight: 96 
-    });
-    
-    // Load projectiles
-    this.load.spritesheet('projectile', 'assets/images/projectile.png', { 
-      frameWidth: 16, 
-      frameHeight: 16 
-    });
-    this.load.spritesheet('enemy-projectile', 'assets/images/enemy-projectile.png', { 
-      frameWidth: 16, 
-      frameHeight: 16 
-    });
-    
-    // Load particle effects
-    this.load.spritesheet('blood-particle', 'assets/images/blood-particle.png', { 
-      frameWidth: 16, 
-      frameHeight: 16 
-    });
-    this.load.spritesheet('shadow-particle', 'assets/images/shadow-particle.png', { 
-      frameWidth: 16, 
-      frameHeight: 16 
-    });
-    
-    // Load environment
-    this.load.image('tileset', 'assets/images/tileset.png');
-    this.load.image('territory-marker', 'assets/images/territory-marker.png');
-    this.load.image('blood-pool', 'assets/images/blood-pool.png');
-    
-    // Load UI elements
-    this.load.image('ability-frame', 'assets/images/ability-frame.png');
-    this.load.image('ability-cooldown', 'assets/images/ability-cooldown.png');
-    this.load.image('health-bar', 'assets/images/health-bar.png');
-    this.load.image('energy-bar', 'assets/images/energy-bar.png');
-    this.load.image('day-icon', 'assets/images/day-icon.png');
-    this.load.image('night-icon', 'assets/images/night-icon.png');
-    this.load.image('minimap-frame', 'assets/images/minimap-frame.png');
-    
-    // Load icon atlas for abilities and status effects
-    this.load.atlas('icons', 'assets/images/icons.png', 'assets/images/icons.json');
-    
-    // Load sound effects for abilities
-    this.load.audio('blood-drain-sound', 'assets/sounds/blood-drain.mp3');
-    this.load.audio('bat-swarm-sound', 'assets/sounds/bat-swarm.mp3');
-    this.load.audio('shadow-dash-sound', 'assets/sounds/shadow-dash.mp3');
-    this.load.audio('blood-lance-sound', 'assets/sounds/blood-lance.mp3');
-    this.load.audio('night-shield-sound', 'assets/sounds/night-shield.mp3');
-    this.load.audio('poison-touch-sound', 'assets/sounds/poison-touch.mp3');
-    this.load.audio('blood-ritual-sound', 'assets/sounds/blood-ritual.mp3');
-    this.load.audio('dominate-sound', 'assets/sounds/dominate.mp3');
-    this.load.audio('mesmerize-sound', 'assets/sounds/mesmerize.mp3');
-    
-    // Load ambient sounds
-    this.load.audio('ambient-night', 'assets/sounds/ambient-night.mp3');
-    this.load.audio('ambient-day', 'assets/sounds/ambient-day.mp3');
-    
-    // Load combat sounds
-    this.load.audio('player-hit', 'assets/sounds/player-hit.mp3');
-    this.load.audio('enemy-hit', 'assets/sounds/enemy-hit.mp3');
-    this.load.audio('enemy-death', 'assets/sounds/enemy-death.mp3');
-    this.load.audio('territory-captured', 'assets/sounds/territory-captured.mp3');
-  }
-
-  create() {
-    // Create animations for player characters
-    this.createPlayerAnimations();
-    
-    // Create animations for enemies
-    this.createEnemyAnimations();
-    
-    // Create animations for ability effects
-    this.createAbilityAnimations();
-    
-    // Create animations for particles
-    this.createParticleAnimations();
-    
-    // Start the game scene if we're connected to a room
-    if (window.gameState.roomJoined) {
-      this.scene.start('GameScene');
-    } else {
-      // Otherwise stay at the loading screen until we join a room
-      // The logic in main.js will take care of starting the game scene
+    // Helper function to create a fallback for sprite sheets
+    const createFallbackSpriteSheet = (key, width, height, frameWidth, frameHeight) => {
+      const graphics = this.make.graphics();
+      const color = Phaser.Display.Color.RandomRGB();
+      graphics.fillStyle(color.color);
+      graphics.fillRect(0, 0, width, height);
+      graphics.lineStyle(1, 0xffffff);
       
-      // Add some text to indicate we're waiting for server connection
-      const width = this.cameras.main.width;
-      const height = this.cameras.main.height;
+      // Add a grid to show frame boundaries
+      for (let y = 0; y < height; y += frameHeight) {
+        for (let x = 0; x < width; x += frameWidth) {
+          graphics.strokeRect(x, y, frameWidth, frameHeight);
+        }
+      }
       
-      this.add.text(width / 2, height / 2, 'Connecting to server...\nPlease wait...', {
-        font: '20px monospace',
-        fill: '#ffffff',
-        align: 'center'
-      }).setOrigin(0.5, 0.5);
-    }
-  }
-  
-  createPlayerAnimations() {
-    // Nosferatu animations
-    this.anims.create({
-      key: 'nosferatu-idle',
-      frames: this.anims.generateFrameNumbers('vampire-nosferatu', { start: 0, end: 3 }),
-      frameRate: 5,
-      repeat: -1
-    });
+      graphics.generateTexture(key, width, height);
+    };
     
-    this.anims.create({
-      key: 'nosferatu-walk',
-      frames: this.anims.generateFrameNumbers('vampire-nosferatu', { start: 4, end: 11 }),
-      frameRate: 10,
-      repeat: -1
-    });
+    // Try to load player sprites with fallbacks
+    const loadPlayerSprites = () => {
+      const clans = ['nosferatu', 'tremere', 'ventrue', 'toreador'];
+      clans.forEach(clan => {
+        this.load.spritesheet(`vampire-${clan}`, `assets/images/vampire-${clan}.png`, { 
+          frameWidth: 64, 
+          frameHeight: 64 
+        }).on('fileerror', () => {
+          createFallbackSpriteSheet(`vampire-${clan}`, 768, 128, 64, 64);
+        });
+      });
+    };
     
-    // Repeat similar animation setup for other vampire clans
+    const loadEnemySprites = () => {
+      const enemyTypes = ['basic', 'hunter', 'swarm', 'brute'];
+      const sizes = [
+        { w: 48, h: 48 },  // basic
+        { w: 48, h: 64 },  // hunter
+        { w: 32, h: 32 },  // swarm
+        { w: 80, h: 80 }   // brute
+      ];
+      
+      enemyTypes.forEach((type, index) => {
+        const { w, h } = sizes[index];
+        this.load.spritesheet(`enemy-${type}`, `assets/images/enemy-${type}.png`, { 
+          frameWidth: w, 
+          frameHeight: h 
+        }).on('fileerror', () => {
+          createFallbackSpriteSheet(`enemy-${type}`, w * 12, h * 2, w, h);
+        });
+      });
+    };
     
-    // Tremere animations
-    this.anims.create({
-      key: 'tremere-idle',
-      frames: this.anims.generateFrameNumbers('vampire-tremere', { start: 0, end: 3 }),
-      frameRate: 5,
-      repeat: -1
-    });
+    const loadAbilityEffects = () => {
+      const abilities = [
+        { name: 'blood-drain', w: 128, h: 128 },
+        { name: 'bat-swarm', w: 32, h: 32 },
+        { name: 'shadow-dash', w: 64, h: 64 },
+        { name: 'blood-lance', w: 96, h: 32 },
+        { name: 'night-shield', w: 128, h: 128 },
+        { name: 'poison-touch', w: 64, h: 64 },
+        { name: 'blood-ritual', w: 128, h: 128 },
+        { name: 'dominate', w: 64, h: 64 },
+        { name: 'mesmerize', w: 96, h: 96 }
+      ];
+      
+      abilities.forEach(ability => {
+        this.load.spritesheet(ability.name, `assets/images/${ability.name}.png`, { 
+          frameWidth: ability.w, 
+          frameHeight: ability.h 
+        }).on('fileerror', () => {
+          createFallbackSpriteSheet(ability.name, ability.w * 4, ability.h, ability.w, ability.h);
+        });
+      });
+    };
     
-    this.anims.create({
-      key: 'tremere-walk',
-      frames: this.anims.generateFrameNumbers('vampire-tremere', { start: 4, end: 11 }),
-      frameRate: 10,
-      repeat: -1
-    });
+    const loadProjectiles = () => {
+      this.load.spritesheet('projectile', 'assets/images/projectile.png', { 
+        frameWidth: 16, 
+        frameHeight: 16 
+      }).on('fileerror', () => {
+        createFallbackSpriteSheet('projectile', 64, 16, 16, 16);
+      });
+      
+      this.load.spritesheet('enemy-projectile', 'assets/images/enemy-projectile.png', { 
+        frameWidth: 16, 
+        frameHeight: 16 
+      }).on('fileerror', () => {
+        createFallbackSpriteSheet('enemy-projectile', 64, 16, 16, 16);
+      });
+    };
     
-    // Ventrue animations
-    this.anims.create({
-      key: 'ventrue-idle',
-      frames: this.anims.generateFrameNumbers('vampire-ventrue', { start: 0, end: 3 }),
-      frameRate: 5,
-      repeat: -1
-    });
+    const loadParticleEffects = () => {
+      this.load.spritesheet('blood-particle', 'assets/images/blood-particle.png', { 
+        frameWidth: 16, 
+        frameHeight: 16 
+      }).on('fileerror', () => {
+        createFallbackSpriteSheet('blood-particle', 96, 16, 16, 16);
+      });
+      
+      this.load.spritesheet('shadow-particle', 'assets/images/shadow-particle.png', { 
+        frameWidth: 16, 
+        frameHeight: 16 
+      }).on('fileerror', () => {
+        createFallbackSpriteSheet('shadow-particle', 96, 16, 16, 16);
+      });
+    };
     
-    this.anims.create({
-      key: 'ventrue-walk',
-      frames: this.anims.generateFrameNumbers('vampire-ventrue', { start: 4, end: 11 }),
-      frameRate: 10,
-      repeat: -1
-    });
+    const loadEnvironment = () => {
+      // Try to load environment assets
+      this.load.image('tileset', 'assets/images/tileset.png')
+        .on('fileerror', () => {
+          // Create a simple tile pattern
+          const graphics = this.make.graphics();
+          graphics.fillStyle(0x111122);
+          graphics.fillRect(0, 0, 512, 512);
+          
+          // Add some texture to the background
+          graphics.lineStyle(1, 0x222244);
+          for (let i = 0; i < 512; i += 32) {
+            graphics.lineBetween(0, i, 512, i);
+            graphics.lineBetween(i, 0, i, 512);
+          }
+          
+          graphics.generateTexture('tileset', 512, 512);
+        });
+        
+      // Load other environment assets
+      const envAssets = [
+        'territory-marker',
+        'blood-pool'
+      ];
+      
+      envAssets.forEach(asset => {
+        this.load.image(asset, `assets/images/${asset}.png`)
+          .on('fileerror', () => {
+            // Create a simple placeholder
+            const graphics = this.make.graphics();
+            graphics.fillStyle(0x993366);
+            graphics.fillCircle(32, 32, 32);
+            graphics.generateTexture(asset, 64, 64);
+          });
+      });
+    };
     
-    // Toreador animations
-    this.anims.create({
-      key: 'toreador-idle',
-      frames: this.anims.generateFrameNumbers('vampire-toreador', { start: 0, end: 3 }),
-      frameRate: 5,
-      repeat: -1
-    });
+    const loadUI = () => {
+      // Try to load UI element images
+      const uiAssets = [
+        'ability-frame',
+        'ability-cooldown',
+        'health-bar',
+        'energy-bar',
+        'day-icon',
+        'night-icon',
+        'minimap-frame'
+      ];
+      
+      uiAssets.forEach(asset => {
+        this.load.image(asset, `assets/images/${asset}.png`)
+          .on('fileerror', () => {
+            // Create a simple placeholder
+            const graphics = this.make.graphics();
+            
+            if (asset === 'health-bar') {
+              graphics.fillStyle(0xff0000);
+              graphics.fillRect(0, 0, 200, 20);
+            } else if (asset === 'energy-bar') {
+              graphics.fillStyle(0x00ffff);
+              graphics.fillRect(0, 0, 200, 20);
+            } else if (asset === 'day-icon') {
+              graphics.fillStyle(0xffcc00);
+              graphics.fillCircle(16, 16, 16);
+            } else if (asset === 'night-icon') {
+              graphics.fillStyle(0x333366);
+              graphics.fillCircle(16, 16, 16);
+            } else {
+              graphics.fillStyle(0x444444);
+              graphics.fillRect(0, 0, 64, 64);
+              graphics.lineStyle(2, 0x888888);
+              graphics.strokeRect(2, 2, 60, 60);
+            }
+            
+            graphics.generateTexture(asset, 64, 64);
+          });
+      });
+    };
     
-    this.anims.create({
-      key: 'toreador-walk',
-      frames: this.anims.generateFrameNumbers('vampire-toreador', { start: 4, end: 11 }),
-      frameRate: 10,
-      repeat: -1
-    });
-  }
-  
-  createEnemyAnimations() {
-    // Basic enemy animations
-    this.anims.create({
-      key: 'enemy-basic-idle',
-      frames: this.anims.generateFrameNumbers('enemy-basic', { start: 0, end: 3 }),
-      frameRate: 5,
-      repeat: -1
-    });
+    const loadSounds = () => {
+      // Try to load sounds but don't create fallbacks as they're not critical
+      const abilityBaseSounds = [
+        'blood-drain', 'bat-swarm', 'shadow-dash', 'blood-lance', 'night-shield',
+        'poison-touch', 'blood-ritual', 'dominate', 'mesmerize'
+      ];
+      
+      abilityBaseSounds.forEach(sound => {
+        this.load.audio(`${sound}-sound`, `assets/sounds/${sound}.mp3`);
+      });
+      
+      // Ambient sounds
+      this.load.audio('ambient-night', 'assets/sounds/ambient-night.mp3');
+      this.load.audio('ambient-day', 'assets/sounds/ambient-day.mp3');
+      
+      // Combat sounds
+      const combatSounds = [
+        'player-hit', 'enemy-hit', 'enemy-death', 'territory-captured'
+      ];
+      
+      combatSounds.forEach(sound => {
+        this.load.audio(sound, `assets/sounds/${sound}.mp3`);
+      });
+    };
     
-    this.anims.create({
-      key: 'enemy-basic-walk',
-      frames: this.anims.generateFrameNumbers('enemy-basic', { start: 4, end: 11 }),
-      frameRate: 10,
-      repeat: -1
-    });
-    
-    // Hunter enemy animations
-    this.anims.create({
-      key: 'enemy-hunter-idle',
-      frames: this.anims.generateFrameNumbers('enemy-hunter', { start: 0, end: 3 }),
-      frameRate: 5,
-      repeat: -1
-    });
-    
-    this.anims.create({
-      key: 'enemy-hunter-walk',
-      frames: this.anims.generateFrameNumbers('enemy-hunter', { start: 4, end: 11 }),
-      frameRate: 10,
-      repeat: -1
-    });
-    
-    this.anims.create({
-      key: 'enemy-hunter-attack',
-      frames: this.anims.generateFrameNumbers('enemy-hunter', { start: 12, end: 15 }),
-      frameRate: 10,
-      repeat: 0
-    });
-    
-    // Swarm enemy animations
-    this.anims.create({
-      key: 'enemy-swarm-idle',
-      frames: this.anims.generateFrameNumbers('enemy-swarm', { start: 0, end: 3 }),
-      frameRate: 8,
-      repeat: -1
-    });
-    
-    this.anims.create({
-      key: 'enemy-swarm-walk',
-      frames: this.anims.generateFrameNumbers('enemy-swarm', { start: 4, end: 11 }),
-      frameRate: 12,
-      repeat: -1
-    });
-    
-    // Brute enemy animations
-    this.anims.create({
-      key: 'enemy-brute-idle',
-      frames: this.anims.generateFrameNumbers('enemy-brute', { start: 0, end: 3 }),
-      frameRate: 5,
-      repeat: -1
-    });
-    
-    this.anims.create({
-      key: 'enemy-brute-walk',
-      frames: this.anims.generateFrameNumbers('enemy-brute', { start: 4, end: 11 }),
-      frameRate: 8,
-      repeat: -1
-    });
-    
-    this.anims.create({
-      key: 'enemy-brute-attack',
-      frames: this.anims.generateFrameNumbers('enemy-brute', { start: 12, end: 17 }),
-      frameRate: 10,
-      repeat: 0
-    });
-  }
-  
-  createAbilityAnimations() {
-    // Blood Drain animation
-    this.anims.create({
-      key: 'blood-drain-effect',
-      frames: this.anims.generateFrameNumbers('blood-drain', { start: 0, end: 9 }),
-      frameRate: 10,
-      repeat: -1
-    });
-    
-    // Bat Swarm animation
-    this.anims.create({
-      key: 'bat-swarm-effect',
-      frames: this.anims.generateFrameNumbers('bat-swarm', { start: 0, end: 7 }),
-      frameRate: 12,
-      repeat: -1
-    });
-    
-    // Shadow Dash animation
-    this.anims.create({
-      key: 'shadow-dash-effect',
-      frames: this.anims.generateFrameNumbers('shadow-dash', { start: 0, end: 5 }),
-      frameRate: 15,
-      repeat: 0
-    });
-    
-    // Blood Lance animation
-    this.anims.create({
-      key: 'blood-lance-effect',
-      frames: this.anims.generateFrameNumbers('blood-lance', { start: 0, end: 3 }),
-      frameRate: 10,
-      repeat: -1
-    });
-    
-    // Night Shield animation
-    this.anims.create({
-      key: 'night-shield-effect',
-      frames: this.anims.generateFrameNumbers('night-shield', { start: 0, end: 7 }),
-      frameRate: 8,
-      repeat: -1
-    });
-    
-    // Additional abilities for different clans
-    
-    // Poison Touch (Nosferatu)
-    this.anims.create({
-      key: 'poison-touch-effect',
-      frames: this.anims.generateFrameNumbers('poison-touch', { start: 0, end: 7 }),
-      frameRate: 12,
-      repeat: 0
-    });
-    
-    // Blood Ritual (Tremere)
-    this.anims.create({
-      key: 'blood-ritual-effect',
-      frames: this.anims.generateFrameNumbers('blood-ritual', { start: 0, end: 11 }),
-      frameRate: 10,
-      repeat: 0
-    });
-    
-    // Dominate (Ventrue)
-    this.anims.create({
-      key: 'dominate-effect',
-      frames: this.anims.generateFrameNumbers('dominate', { start: 0, end: 5 }),
-      frameRate: 8,
-      repeat: 0
-    });
-    
-    // Mesmerize (Toreador)
-    this.anims.create({
-      key: 'mesmerize-effect',
-      frames: this.anims.generateFrameNumbers('mesmerize', { start: 0, end: 9 }),
-      frameRate: 10,
-      repeat: 0
-    });
-  }
-  
-  createParticleAnimations() {
-    // Blood particle animation
-    this.anims.create({
-      key: 'blood-particle-effect',
-      frames: this.anims.generateFrameNumbers('blood-particle', { start: 0, end: 5 }),
-      frameRate: 12,
-      repeat: 0
-    });
-    
-    // Shadow particle animation
-    this.anims.create({
-      key: 'shadow-particle-effect',
-      frames: this.anims.generateFrameNumbers('shadow-particle', { start: 0, end: 5 }),
-      frameRate: 12,
-      repeat: 0
-    });
+    // Load all asset types
+    loadPlayerSprites();
+    loadEnemySprites();
+    loadAbilityEffects();
+    loadProjectiles();
+    loadParticleEffects();
+    loadEnvironment();
+    loadUI();
+    loadSounds();
   }
 }
