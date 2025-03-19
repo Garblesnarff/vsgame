@@ -16,7 +16,6 @@ export class TankyBrute extends Enemy {
   private isCharging: boolean;
   private chargeStartTime: number;
   private chargeTime: number;
-  private vulnerableToBloodLance: boolean;
   private bloodLanceVulnerabilityMultiplier: number;
 
   /**
@@ -68,7 +67,6 @@ export class TankyBrute extends Enemy {
     this.damageReduction = CONFIG.ENEMY.TANKY_BRUTE.DAMAGE_REDUCTION;
     
     // Vulnerability to Blood Lance
-    this.vulnerableToBloodLance = true;
     this.bloodLanceVulnerabilityMultiplier = CONFIG.ENEMY.TANKY_BRUTE.BLOOD_LANCE_VULNERABILITY_MULTIPLIER;
     
     
