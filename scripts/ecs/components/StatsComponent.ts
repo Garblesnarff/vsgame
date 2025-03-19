@@ -10,6 +10,8 @@
       speed: number;
       attackPower: number;
       defense: number;
+      attackSpeedMultiplier: number;
+      lifeStealPercentage: number;
     }
 
     /**
@@ -20,11 +22,15 @@
 
       constructor(initialStats: Stats) {
         this.stats = initialStats;
+        // Initialize new stats if they don't exist
+        this.stats.attackSpeedMultiplier = initialStats.attackSpeedMultiplier ?? 1;
+        this.stats.lifeStealPercentage = initialStats.lifeStealPercentage ?? 0;
       }
 
       getHealth(): number {
         return this.stats.health;
       }
+
 
       setHealth(health: number): void {
         this.stats.health = health;
@@ -76,5 +82,21 @@
 
       setDefense(defense: number): void {
         this.stats.defense = defense;
+      }
+
+      getAttackSpeedMultiplier(): number {
+        return this.stats.attackSpeedMultiplier;
+      }
+
+      setAttackSpeedMultiplier(attackSpeedMultiplier: number): void {
+        this.stats.attackSpeedMultiplier = attackSpeedMultiplier;
+      }
+
+      getLifeStealPercentage(): number {
+        return this.stats.lifeStealPercentage;
+      }
+
+      setLifeStealPercentage(lifeStealPercentage: number): void {
+        this.stats.lifeStealPercentage = lifeStealPercentage;
       }
     }
