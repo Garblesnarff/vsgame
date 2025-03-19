@@ -140,7 +140,7 @@ export class Ability {
 
     const now = Date.now();
     const onCooldown = now - this.lastUsed < this.cooldown;
-    const hasEnergy = this.player.energy >= this.energyCost;
+    const hasEnergy = this.player.stats.getEnergy() >= this.energyCost;
 
     return !onCooldown && hasEnergy && !this.active;
   }
@@ -165,7 +165,7 @@ export class Ability {
     }
 
     // Consume energy
-    this.player.energy -= this.energyCost;
+    this.player.stats.setEnergy(this.player.stats.getEnergy() - this.energyCost);
     this.lastUsed = Date.now();
 
     // Emit ability use event

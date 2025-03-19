@@ -3,6 +3,7 @@ import { AbilityManager } from "../abilities/ability-manager";
 import { GameEvents, EVENTS } from "../utils/event-system";
 import { Game } from "../game/game";
 import { LevelSystem } from "../game/level-system";
+import { StatsComponent } from "../ecs/components/StatsComponent";
 
 /**
  * Interface for auto attack configuration
@@ -55,11 +56,7 @@ export class Player {
   speed: number;
 
   // Stats
-  health: number;
-  maxHealth: number;
-  energy: number;
-  maxEnergy: number;
-  energyRegen: number;
+  stats: StatsComponent;
 
   // Progression
   skillPoints: number;
@@ -101,11 +98,16 @@ export class Player {
     this.speed = CONFIG.PLAYER.SPEED;
 
     // Stats
-    this.health = CONFIG.PLAYER.MAX_HEALTH;
-    this.maxHealth = CONFIG.PLAYER.MAX_HEALTH;
-    this.energy = CONFIG.PLAYER.MAX_ENERGY;
-    this.maxEnergy = CONFIG.PLAYER.MAX_ENERGY;
-    this.energyRegen = CONFIG.PLAYER.ENERGY_REGEN;
+    this.stats = new StatsComponent({
+      health: CONFIG.PLAYER.MAX_HEALTH,
+      maxHealth: CONFIG.PLAYER.MAX_HEALTH,
+      energy: CONFIG.PLAYER.MAX_ENERGY,
+      maxEnergy: CONFIG.PLAYER.MAX_ENERGY,
+      energyRegen: CONFIG.PLAYER.ENERGY_REGEN,
+      speed: CONFIG.PLAYER.SPEED,
+      attackPower: 1, // Default attack power
+      defense: 1,     // Default defense
+    });
 
     // Progression
     this.level = 1;
@@ -176,13 +178,12 @@ export class Player {
 
   /**
    * Regenerates energy over time
-   * @param deltaTime - Time since last update in milliseconds
    */
   regenerateEnergy(deltaTime: number): void {
-    this.energy = Math.min(
-      this.maxEnergy,
-      this.energy + this.energyRegen * (deltaTime / 1000)
-    );
+    this.stats.setEnergy(Math.min(
+      this.stats.getMaxEnergy(),
+      this.stats.getEnergy() + this.stats.getEnergyRegen() * (deltaTime / 1000)
+    ));
   }
 
   /**
@@ -195,6 +196,11 @@ export class Player {
       return false;
     }
 
+    let damageTaken = amount; // Declare damageTaken
+
+    // Apply defense reduction
+    damageTaken = Math.max(1, damageTaken - this.stats.getDefense());
+
     // Check if Night Shield is active
     const nightShield = this.abilityManager.getAbility("nightShield");
     if (
@@ -202,16 +208,16 @@ export class Player {
       nightShield.isActive() &&
       nightShield.currentShield > 0
     ) {
-      return nightShield.absorbDamage(amount);
+      return nightShield.absorbDamage(damageTaken);
     }
 
-    this.health -= amount;
+    this.stats.setHealth(this.stats.getHealth() - damageTaken);
 
     // Emit damage event
-    GameEvents.emit(EVENTS.PLAYER_DAMAGE, amount, this);
+    GameEvents.emit(EVENTS.PLAYER_DAMAGE, damageTaken, this);
 
-    if (this.health <= 0) {
-      this.health = 0;
+    if (this.stats.getHealth() <= 0) {
+      this.stats.setHealth(0);
       this.isAlive = false;
 
       // Emit death event
@@ -223,14 +229,15 @@ export class Player {
 
   /**
    * Heals the player
+   * Heals the player
    * @param amount - Healing amount
    */
   heal(amount: number): void {
-    const oldHealth = this.health;
-    this.health = Math.min(this.maxHealth, this.health + amount);
+    const oldHealth = this.stats.getHealth();
+    this.stats.setHealth(Math.min(this.stats.getMaxHealth(), this.stats.getHealth() + amount));
 
     // Only emit heal event if actually healed
-    if (this.health > oldHealth) {
+    if (this.stats.getHealth() > oldHealth) {
       GameEvents.emit(EVENTS.PLAYER_HEAL, amount, this);
     }
   }
@@ -250,12 +257,12 @@ export class Player {
     const now = Date.now();
 
     // Check cooldown and energy
-    if (now - this.lastAttack < this.attackCooldown || this.energy < 10) {
+    if (now - this.lastAttack < this.attackCooldown || this.stats.getEnergy() < 10) {
       return false;
     }
 
     // Use energy
-    this.energy -= 10;
+    this.stats.setEnergy(this.stats.getEnergy() - 10);
     this.lastAttack = now;
 
     // Calculate direction
@@ -270,7 +277,7 @@ export class Player {
       y: this.y + this.height / 2,
       vx: Math.cos(angle) * this.projectileSpeed,
       vy: Math.sin(angle) * this.projectileSpeed,
-      damage: CONFIG.PLAYER.MANUAL_PROJECTILE_DAMAGE,
+      damage: CONFIG.PLAYER.MANUAL_PROJECTILE_DAMAGE + this.stats.getAttackPower(), // Apply attack power
       isAutoAttack: false,
     });
 
@@ -308,7 +315,7 @@ export class Player {
       y: this.y + this.height / 2,
       vx: Math.cos(angle) * this.projectileSpeed,
       vy: Math.sin(angle) * this.projectileSpeed,
-      damage: this.autoAttack.damage,
+      damage: this.autoAttack.damage + this.stats.getAttackPower(), // Apply attack power
       isAutoAttack: true,
     });
 

@@ -107,7 +107,7 @@ module.exports = (env, argv) => {
       },
       hot: true,
       compress: true,
-      port: 9900,
+      port: 9901,
       open: true
     }
   };

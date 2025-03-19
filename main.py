@@ -6,7 +6,7 @@ app = Flask(__name__)
 
 @app.route("/")
 def index():
-    return send_file('src/index.html')
+    return send_file('index.html')
 
 def main():
     app.run(port=int(os.environ.get('PORT', 80)))

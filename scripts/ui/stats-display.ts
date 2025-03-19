@@ -98,8 +98,8 @@ export class StatsDisplay {
     }
 
     // Update health and energy bars - Add explicit conversion to percentage
-    const healthPercent = Math.max(0, Math.min(100, (this.player.health / this.player.maxHealth) * 100));
-    const energyPercent = Math.max(0, Math.min(100, (this.player.energy / this.player.maxEnergy) * 100));
+    const healthPercent = Math.max(0, Math.min(100, (this.player.stats.getHealth() / this.player.stats.getMaxHealth()) * 100));
+    const energyPercent = Math.max(0, Math.min(100, (this.player.stats.getEnergy() / this.player.stats.getMaxEnergy()) * 100));
     
     this.healthBar.style.width = healthPercent + "%";
     this.energyBar.style.width = energyPercent + "%";

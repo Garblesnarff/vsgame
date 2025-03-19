@@ -12,6 +12,7 @@ import { GameStateManager, defaultStateHandlers } from "./state-manager";
 import { GameEvents, EVENTS } from "../utils/event-system";
 import CONFIG from "../config";
 import { GameState } from "../types/game-types";
+import PassiveSkillMenu from "../ui/PassiveSkillMenu";
 
 /**
  * Main Game class that orchestrates all game systems
@@ -33,9 +34,11 @@ export class Game {
   uiManager: UIManager;
   stateManager: GameStateManager;
   levelSystem: LevelSystem;
+  passiveSkillMenu: PassiveSkillMenu;
 
   // Player
   player: Player;
+  availableKillPoints: number = 0;
 
   /**
    * Create a new game
@@ -75,6 +78,9 @@ export class Game {
 
     // Create UI manager (after player is created)
     this.uiManager = new UIManager(this);
+
+    // Create passive skill menu
+    this.passiveSkillMenu = new PassiveSkillMenu(this);
 
     // Initialize ability UI
     this.player.abilityManager.initializeUI();
@@ -427,8 +433,14 @@ export class Game {
   gameOver(): void {
     this.gameLoop.stop();
 
+    // Store kills
+    this.availableKillPoints = this.levelSystem.kills;
+
     // Change to game over state
     this.stateManager.changeState(GameState.GAME_OVER);
+
+    // Open passive skill menu
+    this.passiveSkillMenu.open();
 
     // Emit game over event
     GameEvents.emit(EVENTS.GAME_OVER, this);
@@ -463,12 +475,15 @@ export class Game {
 
     // Reset level system
     this.levelSystem = new LevelSystem(this.player);
-    
+
     // Register level up handler for the new level system
     this.levelSystem.onLevelUp((_level) => {
       this.player.skillPoints++;
       this.handleLevelUp();
     });
+
+    // Apply purchased passive skills
+    this.applyPurchasedPassiveSkills();
 
     // Initialize player abilities
     this.player.abilityManager.initializeUI();
@@ -496,6 +511,9 @@ export class Game {
     // Reset UI
     this.uiManager.reset();
 
+    // Reset passive skill menu
+    this.passiveSkillMenu.reset();
+
     // Force an immediate UI update
     this.uiManager.update();
 
@@ -507,59 +525,12 @@ export class Game {
   }
 
   /**
-   * Clean up all game entities
+   * Apply purchased passive skills to the player
    */
-  cleanupEntities(): void {
-    // Clean up enemies
-    for (const enemy of this.enemies) {
-      enemy.destroy();
-    }
-    this.enemies = [];
-
-    // Clean up projectiles
-    for (const projectile of this.projectiles) {
-      projectile.destroy();
-    }
-    this.projectiles = [];
-
-    // Clean up particles
-    this.particleSystem.reset();
-
-    // Clean up any DOM elements that might have been missed
-    const bloodNovas = document.querySelectorAll('.blood-nova');
-    bloodNovas.forEach(element => {
-      if (element.parentNode) {
-        element.parentNode.removeChild(element);
-      }
-    });
-
-    const bloodDrainAOEs = document.querySelectorAll('.blood-drain-aoe');
-    bloodDrainAOEs.forEach(element => {
-      if (element.parentNode) {
-        element.parentNode.removeChild(element);
-      }
-    });
-
-    const bats = document.querySelectorAll('.bat');
-    bats.forEach(element => {
-      if (element.parentNode) {
-        element.parentNode.removeChild(element);
-      }
-    });
-
-    const shadowTrails = document.querySelectorAll('.shadow-trail');
-    shadowTrails.forEach(element => {
-      if (element.parentNode) {
-        element.parentNode.removeChild(element);
-      }
-    });
-
-    const bloodParticles = document.querySelectorAll('.blood-particle');
-    bloodParticles.forEach(element => {
-      if (element.parentNode) {
-        element.parentNode.removeChild(element);
-      }
-    });
+  applyPurchasedPassiveSkills(): void {
+    // TODO: Implement this method to apply the purchased passive skills to the player
+    // This will likely involve reading the purchased skills from the passiveSkillMenu
+    // and modifying the player's stats accordingly.
   }
 
   /**
@@ -681,6 +652,62 @@ export class Game {
    */
   getState(): GameState {
     return this.stateManager.getCurrentState();
+  }
+
+   /**
+   * Clean up all game entities
+   */
+  cleanupEntities(): void {
+    // Clean up enemies
+    for (const enemy of this.enemies) {
+      enemy.destroy();
+    }
+    this.enemies = [];
+
+    // Clean up projectiles
+    for (const projectile of this.projectiles) {
+      projectile.destroy();
+    }
+    this.projectiles = [];
+
+    // Clean up particles
+    this.particleSystem.reset();
+
+    // Clean up any DOM elements that might have been missed
+    const bloodNovas = document.querySelectorAll('.blood-nova');
+    bloodNovas.forEach(element => {
+      if (element.parentNode) {
+        element.parentNode.removeChild(element);
+      }
+    });
+
+    const bloodDrainAOEs = document.querySelectorAll('.blood-drain-aoe');
+    bloodDrainAOEs.forEach(element => {
+      if (element.parentNode) {
+        element.parentNode.removeChild(element);
+      }
+    });
+
+    const bats = document.querySelectorAll('.bat');
+    bats.forEach(element => {
+      if (element.parentNode) {
+        element.parentNode.removeChild(element);
+      }
+    });
+
+    const shadowTrails = document.querySelectorAll('.shadow-trail');
+    shadowTrails.forEach(element => {
+      if (element.parentNode) {
+        element.parentNode.removeChild(element);
+      }
+    });
+
+    const bloodParticles = document.querySelectorAll('.blood-particle');
+    bloodParticles.forEach(element => {
+      if (element.parentNode) {
+        element.parentNode.removeChild(element);
+      }
+    });
   }
 }
 
